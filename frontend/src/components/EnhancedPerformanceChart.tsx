@@ -14,8 +14,7 @@ import {
   GridItem,
   Icon,
   Divider,
-  Button,
-  ButtonGroup
+  Button
 } from '@chakra-ui/react'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import {
@@ -35,6 +34,8 @@ import { Line } from 'react-chartjs-2'
 import { CalendarIcon } from '@chakra-ui/icons'
 import 'chartjs-adapter-date-fns'
 import type { SwimRecord, PersonalBest } from '../services/api'
+import { RecentPerformanceComparison } from './RecentPerformanceComparison'
+import { ErrorBoundary } from './ErrorBoundary'
 
 ChartJS.register(
   CategoryScale,
@@ -54,7 +55,7 @@ interface EnhancedPerformanceChartProps {
   onFilterChange?: (distance: string, stroke: string, poolType: string) => void
 }
 
-export const EnhancedPerformanceChart = ({ records, onFilterChange }: EnhancedPerformanceChartProps) => {
+export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChange }: EnhancedPerformanceChartProps) => {
   const [selectedDistance, setSelectedDistance] = useState<string>('50')
   const [selectedStroke, setSelectedStroke] = useState<string>('Freestyle')
   const [selectedPoolType, setSelectedPoolType] = useState<string>('Long Course (LC)')
@@ -139,9 +140,6 @@ export const EnhancedPerformanceChart = ({ records, onFilterChange }: EnhancedPe
     interaction: {
       mode: 'index' as const,
       intersect: false,
-    },
-    onDoubleClick: () => {
-      resetZoom()
     },
     plugins: {
       title: {
@@ -356,21 +354,41 @@ export const EnhancedPerformanceChart = ({ records, onFilterChange }: EnhancedPe
     <Card bg={cardBg} borderWidth={1} borderColor={borderColor} shadow="lg">
       {/* Header */}
       <CardHeader bg={headerBg} borderTopRadius="md">
-        <VStack spacing={4} align="stretch">
-          <HStack>
-            <Icon as={CalendarIcon} color="blue.600" />
-            <Heading size="md" color="blue.700">
-              Performance progression over time - Select specific pool type for cleaner view | Interactive Zoom Available
-            </Heading>
-          </HStack>
-          <Text fontSize="sm" color="blue.600" fontWeight="medium">
-            📊 Graph shows improvement: downward trend means getting faster! | 🔍 Use mouse wheel to zoom into specific time periods
-          </Text>
-        </VStack>
+        <HStack spacing={3} align="center">
+          <Box 
+            bg="purple.500" 
+            color="white"
+            p={3} 
+            borderRadius="xl"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Icon as={CalendarIcon} boxSize={6} />
+          </Box>
+          <Heading size="lg" color="purple.600" fontWeight="600">
+            Performance Progress
+          </Heading>
+        </HStack>
       </CardHeader>
 
       <CardBody p={6}>
         <VStack spacing={6} align="stretch">
+          {/* Brief Info Section */}
+          <Box bg={useColorModeValue('purple.50', 'purple.900')} p={4} borderRadius="lg" borderWidth={1} borderColor="purple.200">
+            <VStack spacing={2} align="start">
+              <HStack spacing={2}>
+                <Text fontSize="sm" color="purple.600" fontWeight="500">
+                  📊 Performance progression over time - Select specific pool type for cleaner view
+                </Text>
+              </HStack>
+              <HStack spacing={2}>
+                <Text fontSize="sm" color="purple.600" fontWeight="500">
+                  📈 Graph shows improvement: downward trend means getting faster!
+                </Text>
+              </HStack>
+            </VStack>
+          </Box>
           {/* Filter Controls */}
           <Grid templateColumns="repeat(3, 1fr)" gap={4}>
             <GridItem>
@@ -509,6 +527,90 @@ export const EnhancedPerformanceChart = ({ records, onFilterChange }: EnhancedPe
               </Box>
             </CardBody>
           </Card>
+
+          {/* Integrated Performance Comparison */}
+          <Box mt={8}>
+            <Card 
+              bg={useColorModeValue('green.50', 'green.900')} 
+              borderWidth={2} 
+              borderColor="green.200" 
+              shadow="lg"
+              borderRadius="xl"
+              overflow="hidden"
+            >
+              <CardHeader pb={4} bg={useColorModeValue('green.100', 'green.800')}>
+                <VStack spacing={3}>
+                  <HStack spacing={4} align="center" justify="center">
+                    <Box 
+                      bg="green.500" 
+                      color="white"
+                      p={3} 
+                      borderRadius="xl"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      shadow="md"
+                    >
+                      <Text fontSize="xl" fontWeight="bold">📈</Text>
+                    </Box>
+                    <VStack spacing={1} align="center">
+                      <Text fontSize="xl" fontWeight="bold" color="green.800" letterSpacing="tight">
+                        Performance Analytics
+                      </Text>
+                      <Text fontSize="sm" color="green.600" fontWeight="medium">
+                        Detailed comparison insights
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  <Box bg="white" px={4} py={2} borderRadius="full" shadow="sm" border="1px solid" borderColor="green.200">
+                    <HStack spacing={2} align="center">
+                      <Box w="2" h="2" bg="green.500" borderRadius="full"></Box>
+                      <Text fontSize="sm" color="green.700" fontWeight="semibold">
+                        {selectedDistance}m {selectedStroke} • {selectedPoolType === 'Long Course (LC)' ? 'Long Course' : 'Short Course'}
+                      </Text>
+                      <Box w="2" h="2" bg="green.500" borderRadius="full"></Box>
+                    </HStack>
+                  </Box>
+                </VStack>
+              </CardHeader>
+              <CardBody px={6} py={6}>
+                {records && personalBests ? (
+                  <ErrorBoundary>
+                    <RecentPerformanceComparison
+                      records={records}
+                      personalBests={personalBests}
+                      selectedDistance={selectedDistance}
+                      selectedStroke={selectedStroke}
+                      selectedPoolType={selectedPoolType}
+                    />
+                  </ErrorBoundary>
+                ) : (
+                  <Box textAlign="center" py={12}>
+                    <VStack spacing={4}>
+                      <Box 
+                        bg="gray.100" 
+                        p={4} 
+                        borderRadius="full"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Text fontSize="2xl">⏳</Text>
+                      </Box>
+                      <VStack spacing={2}>
+                        <Text color="gray.600" fontSize="lg" fontWeight="semibold">
+                          Loading performance comparison...
+                        </Text>
+                        <Text color="gray.500" fontSize="sm">
+                          Analyzing your swimming data
+                        </Text>
+                      </VStack>
+                    </VStack>
+                  </Box>
+                )}
+              </CardBody>
+            </Card>
+          </Box>
         </VStack>
       </CardBody>
     </Card>

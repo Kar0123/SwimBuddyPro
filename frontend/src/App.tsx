@@ -7,15 +7,17 @@ import {
   useColorModeValue,
   Flex,
   Spacer,
-  useToast
+  useToast,
+  HStack
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { SwimmerInput } from './components/SwimmerInput'
 import { KidDashboard } from './components/KidDashboard'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CustomTitleBar } from './components/CustomTitleBar'
 import type { SwimmerData } from './services/api'
 import { apiService } from './services/api'
+import { PageTransition } from './components/animations/PageTransitions'
 
 const MotionBox = motion(Box)
 
@@ -24,9 +26,61 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const toast = useToast()
 
+  // Debug: Add event listeners to detect what might be clearing the swimmer data
+  useEffect(() => {
+    const handleBeforeUnload = (_e: BeforeUnloadEvent) => {
+      console.log('🔄 Page unload detected')
+    }
+
+    const handlePopState = (e: PopStateEvent) => {
+      console.log('🔄 Browser navigation detected:', e)
+    }
+
+    const handleScroll = () => {
+      // Only log if we're at the bottom of the page
+      const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100
+      if (isAtBottom && currentSwimmer) {
+        console.log('📜 Scrolled to bottom with current swimmer:', currentSwimmer.name)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Log potentially problematic key combinations
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'r' || e.key === 'R')) {
+        console.log('🔄 Refresh key combination detected')
+      }
+      if (e.key === 'F5') {
+        console.log('🔄 F5 refresh detected')
+      }
+      if (e.key === 'Backspace' && !(e.target as HTMLElement)?.closest('input, textarea')) {
+        console.log('⬅️ Backspace key detected outside input field')
+        e.preventDefault() // Prevent browser back navigation
+      }
+    }
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('popstate', handlePopState)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('keydown', handleKeyDown)
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('popstate', handlePopState)
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [currentSwimmer])
+
+  // Debug: Log when currentSwimmer changes
+  useEffect(() => {
+    console.log('🏊‍♀️ Current swimmer changed:', currentSwimmer ? currentSwimmer.name : 'null')
+  }, [currentSwimmer])
+
   const bgGradient = useColorModeValue(
-    'linear(to-br, primary.50, aqua.50, wave.50)',
-    'linear(to-br, gray.900, primary.900, aqua.900)'
+    'linear(135deg, #f8fafc 0%, #e2e8f0 20%, #f1f5f9 40%, #e2e8f0 60%, #f8fafc 80%, #f1f5f9 100%)',
+    'linear(135deg, gray.900, primary.900, aqua.900)'
   )
 
   const handleSwimmerSelect = async (tiref: string) => {
@@ -121,6 +175,11 @@ function App() {
       minH="100vh" 
       bgGradient={bgGradient}
       position="relative"
+      // Prevent browser gestures that might cause navigation
+      style={{
+        overscrollBehavior: 'contain',
+        touchAction: 'pan-y pinch-zoom'
+      }}
     >
       {/* Custom Title Bar for Electron */}
       <CustomTitleBar />
@@ -153,22 +212,25 @@ function App() {
                 </Text>
               </VStack>
               <Spacer />
-              {currentSwimmer && (
-                <VStack align="end" spacing={1}>
-                  <Text fontSize="sm" color="gray.500">Current Swimmer</Text>
-                  <Text fontWeight="bold" color="primary.600">
-                    {currentSwimmer.name}
-                  </Text>
-                  {currentSwimmer.club && (
-                    <Text fontSize="sm" color="gray.500">
-                      {currentSwimmer.club}
+              <HStack spacing={4}>
+                {currentSwimmer && (
+                  <VStack align="end" spacing={1}>
+                    <Text fontSize="sm" color="gray.500">Current Swimmer</Text>
+                    <Text fontWeight="bold" color="primary.600">
+                      {currentSwimmer.name}
                     </Text>
-                  )}
-                </VStack>
-              )}
+                    {currentSwimmer.club && (
+                      <Text fontSize="sm" color="gray.500">
+                        {currentSwimmer.club}
+                      </Text>
+                    )}
+                  </VStack>
+                )}
+              </HStack>
             </Flex>
           </MotionBox>
 
+          {/* Main Content */}
           {/* Swimmer Input Section */}
           <MotionBox
             initial={{ opacity: 0, y: 20 }}
@@ -198,27 +260,26 @@ function App() {
           )}
 
           {/* Welcome Message */}
-          {!currentSwimmer && !isLoading && (
-            <MotionBox
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+          <PageTransition 
+            isVisible={!currentSwimmer && !isLoading}
+            transitionKey="welcome"
+            direction="fade"
+            delay={0.3}
+          >
+            <Box
+              textAlign="center"
+              py={16}
+              color={useColorModeValue('gray.600', 'gray.400')}
             >
-              <Box
-                textAlign="center"
-                py={16}
-                color={useColorModeValue('gray.600', 'gray.400')}
-              >
-                <Text fontSize="xl" mb={4}>
-                  Welcome to SwimBuddy Pro! 🏊‍♂️
-                </Text>
-                <Text fontSize="md" maxW="md" mx="auto" lineHeight="tall">
-                  Enter a swimmer's membership ID above to start analyzing their 
-                  swimming performance with professional-grade insights and beautiful visualizations.
-                </Text>
-              </Box>
-            </MotionBox>
-          )}
+              <Text fontSize="xl" mb={4}>
+                Welcome to SwimBuddy Pro! 🏊‍♂️
+              </Text>
+              <Text fontSize="md" maxW="md" mx="auto" lineHeight="tall">
+                Enter a swimmer's membership ID above to start analyzing their 
+                swimming performance with professional-grade insights and beautiful visualizations.
+              </Text>
+            </Box>
+          </PageTransition>
         </VStack>
       </Container>
     </Box>

@@ -17,7 +17,6 @@ import {
   Spacer,
   IconButton,
   useColorModeValue,
-  Skeleton,
   SimpleGrid,
   Tooltip
 } from '@chakra-ui/react'
@@ -25,6 +24,8 @@ import { SearchIcon, DownloadIcon } from '@chakra-ui/icons'
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { personalBestsCardsApi } from '../services/api'
+import { SkeletonPersonalBests } from './skeletons/AdvancedSkeletons'
+import { SwimmingLoader } from './animations/SwimmingLoaders'
 
 const MotionCard = motion(Card)
 
@@ -137,8 +138,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
       day: 'numeric',
-      month: 'short',
-      year: 'numeric'
+      month: 'short'
     })
   }
 
@@ -303,14 +303,19 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
     return (
       <Card bg={cardBg}>
         <CardHeader>
-          <Skeleton height="24px" width="300px" />
+          <VStack spacing={4} align="stretch">
+            <Flex align="center" justify="center" py={4}>
+              <VStack spacing={3}>
+                <SwimmingLoader type="bubbles" size="50px" color="blue.400" />
+                <Text fontSize="sm" color="gray.500">
+                  Loading personal bests...
+                </Text>
+              </VStack>
+            </Flex>
+          </VStack>
         </CardHeader>
         <CardBody>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} height="200px" borderRadius="md" />
-            ))}
-          </SimpleGrid>
+          <SkeletonPersonalBests />
         </CardBody>
       </Card>
     )
@@ -323,7 +328,19 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
           <VStack spacing={4}>
             <Text color="red.500" fontSize="lg">Error loading personal bests</Text>
             <Text color={textColor}>{error}</Text>
-            <Button onClick={() => window.location.reload()}>Retry</Button>
+            <Button onClick={() => {
+              console.log('🔄 Personal bests retry clicked')
+              setError(null)
+              setIsLoading(true)
+              // Retry without full page reload
+              personalBestsCardsApi(tiref).then(result => {
+                setData(result)
+                setIsLoading(false)
+              }).catch(err => {
+                setError(err instanceof Error ? err.message : 'Failed to load data')
+                setIsLoading(false)
+              })
+            }}>Retry</Button>
           </VStack>
         </CardBody>
       </Card>
@@ -432,117 +449,133 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                   borderRadius="xl"
                   overflow="hidden"
                   size="sm"
-                  height="200px"
+                  height="180px"
                   position="relative"
                   _hover={{ 
-                    transform: 'translateY(-4px)',
-                    shadow: 'xl',
+                    transform: 'translateY(-2px)',
+                    shadow: 'lg',
                     borderColor: pb.stroke_color,
                     cursor: 'pointer'
                   }}
-                  _before={{
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '3px',
-                    background: `linear-gradient(90deg, ${pb.stroke_color}, ${pb.stroke_color}99)`,
-                    zIndex: 1
-                  }}
                 >
-                  <CardHeader 
-                    bg="transparent"
-                    color={textColor} 
-                    py={3} 
-                    px={4}
-                    minH="60px"
-                    position="relative"
-                    zIndex={2}
-                  >
-                    <VStack spacing={1} align="center">
-                      <HStack spacing={2} align="center">
-                        <Text fontSize="lg" flexShrink={0}>
-                          {pb.stroke_icon}
-                        </Text>
-                        <Badge 
-                          colorScheme={pb.primary_best.pool_type === 'LC' ? 'blue' : 'green'}
-                          variant="subtle" 
-                          size="sm"
-                          fontSize="2xs"
-                          px={2}
-                          py={1}
-                          borderRadius="md"
-                          fontWeight="500"
+                  {/* Colored Header Bar */}
+                  <Box 
+                    bg={pb.stroke_color}
+                    height="4px"
+                    width="100%"
+                  />
+                  
+                  <CardBody p={4} display="flex" flexDirection="column" height="full">
+                    {/* Header with stroke icon in colored box and pool type */}
+                    <HStack justify="space-between" align="start" mb={3}>
+                      <HStack spacing={2}>
+                        <Box
+                          bgGradient={`linear(135deg, ${pb.stroke_color}40, ${pb.stroke_color}20)`}
+                          color="gray.800"
+                          px={3}
+                          py={1.5}
+                          borderRadius="lg"
+                          fontSize="sm"
+                          fontWeight="600"
+                          fontFamily="'Inter', 'Segoe UI', 'Roboto', sans-serif"
+                          display="flex"
+                          alignItems="center"
+                          gap={1}
+                          shadow="sm"
+                          border="1px solid"
+                          borderColor={`${pb.stroke_color}60`}
+                          position="relative"
+                          letterSpacing="0.5px"
+                          _before={{
+                            content: '""',
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            bgGradient: `linear(135deg, whiteAlpha.400, transparent)`,
+                            borderRadius: "lg",
+                            pointerEvents: "none"
+                          }}
                         >
-                          {pb.primary_best.pool_type}
-                        </Badge>
+                          <Text fontSize="sm" zIndex={1} color="gray.800">{pb.stroke_icon}</Text>
+                          <Text 
+                            fontSize="xs" 
+                            textTransform="uppercase" 
+                            zIndex={1} 
+                            color="gray.800"
+                            fontFamily="'Inter', 'Segoe UI', 'Roboto', sans-serif"
+                            fontWeight="700"
+                            letterSpacing="0.8px"
+                          >
+                            {pb.stroke}
+                          </Text>
+                        </Box>
                       </HStack>
-                      <Text 
-                        fontSize="sm" 
-                        fontWeight="600" 
-                        noOfLines={2}
-                        lineHeight="1.2"
-                        color={accentColor}
-                        textAlign="center"
+                      <Badge 
+                        colorScheme={pb.primary_best.pool_type === 'LC' ? 'gray' : 'green'}
+                        variant="outline" 
+                        size="sm"
+                        fontSize="xs"
+                        px={2}
+                        py={1}
+                        borderRadius="md"
+                        fontWeight="400"
                       >
-                        {pb.event_name}
-                      </Text>
-                    </VStack>
-                  </CardHeader>
+                        {pb.primary_best.pool_type}
+                      </Badge>
+                    </HStack>
 
-                  <CardBody p={4} display="flex" flexDirection="column" justifyContent="space-between">
-                    {/* Best Time - Main Focus */}
-                    <VStack spacing={1} align="center" flex="1" justify="center">
+                    {/* Distance and Time */}
+                    <VStack spacing={1} align="start" mb={2}>
                       <Text 
-                        fontSize="xl" 
-                        fontWeight="700" 
-                        color={pb.stroke_color}
+                        fontSize="lg" 
+                        fontWeight="500" 
+                        color={textColor}
                         lineHeight="1.1"
+                      >
+                        {pb.distance}m
+                      </Text>
+                      <Text 
+                        fontSize="2xl" 
+                        fontWeight="600" 
+                        color="gray.800"
+                        lineHeight="1"
                         letterSpacing="-0.02em"
-                        textAlign="center"
                       >
                         {formatTime(pb.primary_best.time)}
                       </Text>
-                      <Text fontSize="xs" color={textColor} fontWeight="500">
+                      <Text fontSize="sm" color="gray.500" fontWeight="400">
                         Personal Best
                       </Text>
-                      <Text fontSize="xs" color={textColor} fontWeight="500">
-                        {pb.primary_best.wa_points} WA pts
-                      </Text>
                     </VStack>
 
-                    {/* Date and Venue */}
-                    <VStack spacing={1} align="center" mt={3}>
-                      <Text fontSize="xs" color={textColor} fontWeight="500" textAlign="center">
-                        📅 {formatDate(pb.primary_best.date)}
+                    {/* Points, Venue and Date */}
+                    <HStack justify="space-between" align="center" mb={2}>
+                      <HStack spacing={2} flex={1}>
+                        <HStack spacing={1}>
+                          <Text fontSize="lg" fontWeight="600" color={pb.stroke_color}>
+                            {pb.primary_best.wa_points}
+                          </Text>
+                          <Text fontSize="sm" color="gray.500" fontWeight="400">
+                            pts
+                          </Text>
+                        </HStack>
+                        <HStack spacing={1} align="center">
+                          <Text fontSize="xs" color="gray.400">📍</Text>
+                          <Text 
+                            fontSize="xs" 
+                            color="gray.500" 
+                            fontWeight="400"
+                            noOfLines={1}
+                          >
+                            {pb.primary_best.venue}
+                          </Text>
+                        </HStack>
+                      </HStack>
+                      <Text fontSize="sm" color="gray.500" fontWeight="400">
+                        {formatDate(pb.primary_best.date)}
                       </Text>
-                      <Text 
-                        fontSize="xs" 
-                        color={textColor} 
-                        fontWeight="400" 
-                        opacity={0.8}
-                        textAlign="center"
-                        noOfLines={1}
-                      >
-                        📍 {pb.primary_best.venue}
-                      </Text>
-                    </VStack>
-
-                    {/* Trend Indicator */}
-                    <HStack justify="center" align="center" mt={2}>
-                      <Text fontSize="sm">{getTrendIcon(pb.improvement.trend)}</Text>
-                      <Badge 
-                        colorScheme={getTrendColor(pb.improvement.trend)} 
-                        size="sm"
-                        fontSize="2xs"
-                        variant="subtle"
-                        borderRadius="md"
-                        fontWeight="500"
-                      >
-                        {pb.improvement.trend === 'improving' ? 'IMPROVING' : 
-                         pb.improvement.trend === 'declining' ? 'DECLINING' : 'STABLE'}
-                      </Badge>
                     </HStack>
                   </CardBody>
                 </MotionCard>

@@ -3,17 +3,12 @@ import {
   VStack,
   HStack,
   Text,
-  Badge,
-  Flex,
   Icon,
-  useColorModeValue,
-  SimpleGrid,
   Card,
-  CardBody,
-  CardHeader,
-  Heading
+  Heading,
+  Flex
 } from '@chakra-ui/react'
-import { ChevronUpIcon, ChevronDownIcon, MinusIcon, StarIcon, TimeIcon } from '@chakra-ui/icons'
+import { ChevronUpIcon, ChevronDownIcon, MinusIcon, TimeIcon } from '@chakra-ui/icons'
 import type { SwimRecord, PersonalBest } from '../services/api'
 
 interface RecentPerformanceComparisonProps {
@@ -32,11 +27,6 @@ export const RecentPerformanceComparison = ({
   selectedPoolType
 }: RecentPerformanceComparisonProps) => {
   try {
-    const cardBg = useColorModeValue('white', 'gray.700')
-    const statBg = useColorModeValue('gray.50', 'gray.600')
-    const borderColor = useColorModeValue('gray.200', 'gray.600')
-    const accentColor = useColorModeValue('primary.500', 'primary.300')
-
     // Safe fallbacks for data
     const safeRecords = records || []
     const safePersonalBests = personalBests || []
@@ -68,14 +58,29 @@ export const RecentPerformanceComparison = ({
 
   if (sortedRecords.length === 0) {
     return (
-      <VStack spacing={4} align="stretch">
-        <Text fontSize="sm" color="gray.500" textAlign="center">
-          {!distance || !stroke 
-            ? "Select an event in the Performance Chart to see comparison"
-            : `No races found for ${distance}m ${stroke}${poolType ? ` (${poolType})` : ''}`
-          }
-        </Text>
-      </VStack>
+      <Box maxW="600px" mx="auto">
+        <Card 
+          bg="linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%)" 
+          borderRadius="2xl" 
+          p={8}
+          shadow="lg"
+          borderWidth="1px"
+          borderColor="blue.100"
+        >
+          <VStack spacing={4} align="center">
+            <Icon as={TimeIcon} color="blue.300" boxSize={12} />
+            <Heading size="md" color="blue.600" textAlign="center">
+              Recent Performance Comparison
+            </Heading>
+            <Text fontSize="md" color="gray.500" textAlign="center">
+              {!distance || !stroke 
+                ? "Select an event in the Performance Chart to see comparison"
+                : `No races found for ${distance}m ${stroke}${poolType ? ` (${poolType})` : ''}`
+              }
+            </Text>
+          </VStack>
+        </Card>
+      </Box>
     )
   }
 
@@ -135,253 +140,304 @@ export const RecentPerformanceComparison = ({
   // Calculate improvements with safe fallbacks
   const previousComparison = (previous && mostRecent) ? getTrendDisplay(mostRecent.timeInSeconds, previous.timeInSeconds) : null
   const pbComparison = (personalBest && mostRecent) ? getTrendDisplay(mostRecent.timeInSeconds, personalBest.bestTimeSeconds) : null
-
+  
   const previousTimeDiff = previous ? mostRecent.timeInSeconds - previous.timeInSeconds : 0
   const pbTimeDiff = personalBest ? mostRecent.timeInSeconds - personalBest.bestTimeSeconds : 0
 
   return (
-    <VStack spacing={6} align="stretch">
-      {/* Event Header */}
-      <Box textAlign="center" py={2}>
-        <Text fontSize="lg" fontWeight="bold" color={accentColor}>
-          {distance}m {stroke}
-        </Text>
-        <Text fontSize="sm" color="gray.500">
-          Performance Analysis {poolType && `• ${poolType} Pool`}
-        </Text>
-      </Box>
-
-      <SimpleGrid columns={1} spacing={6}>
-        {/* Most Recent vs Previous Race Card */}
-        {previous && (
-          <Card bg={cardBg} borderWidth={1} borderColor={borderColor}>
-            <CardHeader pb={2}>
-              <HStack justify="space-between">
-                <Heading size="sm" color="primary.600">
-                  <Icon as={TimeIcon} mr={2} />
-                  Recent vs Previous Race
+    <Box maxW="1000px" mx="auto">
+      {/* Side by side layout when both comparisons exist */}
+      {previous && personalBest ? (
+        <HStack spacing={6} align="stretch">
+          {/* Recent vs Previous Race */}
+          <Card 
+            bg="linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%)" 
+            borderRadius="xl" 
+            p={4}
+            shadow="md"
+            borderWidth="1px"
+            borderColor="blue.100"
+            flex={1}
+          >
+            <VStack spacing={4}>
+              <HStack spacing={2} align="center">
+                <Icon as={TimeIcon} color="blue.500" boxSize={4} />
+                <Heading size="sm" color="blue.600" fontWeight="600">
+                  vs Previous Race
                 </Heading>
-                <Badge colorScheme="blue" variant="subtle">
-                  Race Comparison
-                </Badge>
               </HStack>
-            </CardHeader>
-            <CardBody pt={0}>
+
+              {/* Compact Time Comparison */}
+              <HStack spacing={4} w="full" justify="center" align="center">
+                <VStack spacing={1} align="center">
+                  <Text fontSize="xs" color="gray.600" fontWeight="500">Previous</Text>
+                  <Text fontSize="2xl" fontWeight="bold" color="gray.700">{previous.time}</Text>
+                  <Text fontSize="xs" color="gray.500">{new Date(previous.date).toLocaleDateString()}</Text>
+                </VStack>
+
+                <Icon 
+                  as={previousComparison?.icon || MinusIcon} 
+                  color={previousComparison?.color || 'gray.400'}
+                  boxSize={6}
+                />
+
+                <VStack spacing={1} align="center">
+                  <Text fontSize="xs" color="gray.600" fontWeight="500">Recent</Text>
+                  <Text fontSize="2xl" fontWeight="bold" color="blue.600">{mostRecent.time}</Text>
+                  <Text fontSize="xs" color="gray.500">{new Date(mostRecent.date).toLocaleDateString()}</Text>
+                </VStack>
+              </HStack>
+
+              {/* Compact Analysis */}
+              {previousComparison && (
+                <VStack spacing={1} align="center" w="full">
+                  <HStack align="center" spacing={1}>
+                    <Text fontSize="sm" fontWeight="600" color={previousComparison.color}>
+                      {previousTimeDiff < 0 ? 'Faster' : previousTimeDiff > 0 ? 'Slower' : 'Same'} by {formatTimeDifference(Math.abs(previousTimeDiff))}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="xs" color="gray.500" textAlign="center">
+                    {Math.abs((previousTimeDiff / previous.timeInSeconds) * 100).toFixed(2)}% {previousTimeDiff < 0 ? 'improvement' : 'slower'}
+                  </Text>
+                </VStack>
+              )}
+            </VStack>
+          </Card>
+
+          {/* Recent vs Personal Best */}
+          <Card 
+            bg="linear-gradient(135deg, #fff8f0 0%, #fff0e6 100%)" 
+            borderRadius="xl" 
+            p={4}
+            shadow="md"
+            borderWidth="1px"
+            borderColor="orange.100"
+            flex={1}
+          >
+            <VStack spacing={4}>
+              <HStack spacing={2} align="center">
+                <Icon as={TimeIcon} color="orange.500" boxSize={4} />
+                <Heading size="sm" color="orange.600" fontWeight="600">
+                  vs Personal Best
+                </Heading>
+              </HStack>
+
+              {/* Compact Time Comparison */}
+              <HStack spacing={4} w="full" justify="center" align="center">
+                <VStack spacing={1} align="center">
+                  <Text fontSize="xs" color="gray.600" fontWeight="500">PB</Text>
+                  <Text fontSize="2xl" fontWeight="bold" color="orange.600">{personalBest.bestTime}</Text>
+                  <Text fontSize="xs" color="gray.500">{new Date(personalBest.date).toLocaleDateString()}</Text>
+                </VStack>
+
+                <Icon 
+                  as={pbComparison?.icon || MinusIcon} 
+                  color={pbComparison?.color || 'gray.400'}
+                  boxSize={6}
+                />
+
+                <VStack spacing={1} align="center">
+                  <Text fontSize="xs" color="gray.600" fontWeight="500">Recent</Text>
+                  <Text fontSize="2xl" fontWeight="bold" color="blue.600">{mostRecent.time}</Text>
+                  <Text fontSize="xs" color="gray.500">{new Date(mostRecent.date).toLocaleDateString()}</Text>
+                </VStack>
+              </HStack>
+
+              {/* Compact Analysis */}
+              {pbComparison && (
+                <VStack spacing={1} align="center" w="full">
+                  <HStack align="center" spacing={1}>
+                    <Text fontSize="sm" fontWeight="600" color={pbComparison.color}>
+                      {pbTimeDiff < 0 ? 'New PB!' : pbTimeDiff > 0 ? 'Off PB' : 'Tied PB'} 
+                      {pbTimeDiff !== 0 && ` by ${formatTimeDifference(Math.abs(pbTimeDiff))}`}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="xs" color="gray.500" textAlign="center">
+                    {pbTimeDiff < 0 
+                      ? `${Math.abs((pbTimeDiff / personalBest.bestTimeSeconds) * 100).toFixed(2)}% improvement`
+                      : pbTimeDiff > 0
+                      ? `${Math.abs((pbTimeDiff / personalBest.bestTimeSeconds) * 100).toFixed(2)}% off PB`
+                      : 'Tied PB!'
+                    }
+                  </Text>
+                </VStack>
+              )}
+            </VStack>
+          </Card>
+        </HStack>
+      ) : (
+        <VStack spacing={4} align="stretch" maxW="600px" mx="auto">
+          {/* Single comparison when only one exists */}
+          {previous && !personalBest && (
+            <Card 
+              bg="linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%)" 
+              borderRadius="xl" 
+              p={5}
+              shadow="md"
+              borderWidth="1px"
+              borderColor="blue.100"
+            >
               <VStack spacing={4}>
-                {/* Time Comparison */}
-                <HStack spacing={4} align="stretch" w="full">
-                  {/* Most Recent */}
-                  <Box flex={1} p={3} bg="primary.50" borderRadius="md" borderWidth={2} borderColor="primary.200" position="relative">
-                    <Badge position="absolute" top={1} right={1} colorScheme="primary" size="xs">
-                      {mostRecent.poolType}
-                    </Badge>
-                    <VStack spacing={1}>
-                      <Text fontSize="xs" color="gray.600" fontWeight="bold">MOST RECENT</Text>
-                      <Text fontSize="2xl" fontWeight="bold" color="primary.600">
-                        {mostRecent.time}
-                      </Text>
-                      <Text fontSize="xs" color="gray.500">
-                        {new Date(mostRecent.date).toLocaleDateString()}
-                      </Text>
-                      <Text fontSize="xs" color="gray.600" textAlign="center" noOfLines={2}>
-                        {mostRecent.meet}
-                      </Text>
-                      {mostRecent.isPersonalBest && (
-                        <Badge colorScheme="green" size="sm">🏆 PB!</Badge>
-                      )}
-                    </VStack>
-                  </Box>
-
-                  {/* vs */}
-                  <Flex align="center" px={2}>
-                    <Text fontSize="sm" color="gray.400" fontWeight="bold">vs</Text>
-                  </Flex>
-
-                  {/* Previous */}
-                  <Box flex={1} p={3} bg={statBg} borderRadius="md" borderWidth={1} borderColor={borderColor} position="relative">
-                    <Badge position="absolute" top={1} right={1} colorScheme="gray" size="xs">
-                      {previous.poolType}
-                    </Badge>
-                    <VStack spacing={1}>
-                      <Text fontSize="xs" color="gray.600" fontWeight="bold">PREVIOUS</Text>
-                      <Text fontSize="2xl" fontWeight="bold" color="gray.600">
-                        {previous.time}
-                      </Text>
-                      <Text fontSize="xs" color="gray.500">
-                        {new Date(previous.date).toLocaleDateString()}
-                      </Text>
-                      <Text fontSize="xs" color="gray.600" textAlign="center" noOfLines={2}>
-                        {previous.meet}
-                      </Text>
-                      {previous.isPersonalBest && (
-                        <Badge colorScheme="gray" size="sm">Was PB</Badge>
-                      )}
-                    </VStack>
-                  </Box>
+                <HStack spacing={2} align="center">
+                  <Icon as={TimeIcon} color="blue.500" boxSize={5} />
+                  <Heading size="md" color="blue.600" fontWeight="600">
+                    Recent vs Previous Race
+                  </Heading>
                 </HStack>
 
-                {/* Analysis */}
+                <HStack spacing={6} w="full" justify="center" align="center">
+                  <VStack spacing={2} align="center">
+                    <Text fontSize="sm" color="gray.600" fontWeight="500">Previous</Text>
+                    <Text fontSize="3xl" fontWeight="bold" color="gray.700">{previous.time}</Text>
+                    <Text fontSize="sm" color="gray.500">{new Date(previous.date).toLocaleDateString()}</Text>
+                  </VStack>
+
+                  <Icon 
+                    as={previousComparison?.icon || MinusIcon} 
+                    color={previousComparison?.color || 'gray.400'}
+                    boxSize={8}
+                  />
+
+                  <VStack spacing={2} align="center">
+                    <Text fontSize="sm" color="gray.600" fontWeight="500">Recent</Text>
+                    <Text fontSize="3xl" fontWeight="bold" color="blue.600">{mostRecent.time}</Text>
+                    <Text fontSize="sm" color="gray.500">{new Date(mostRecent.date).toLocaleDateString()}</Text>
+                  </VStack>
+                </HStack>
+
                 {previousComparison && (
-                  <Box p={3} bg={previousComparison.bgColor} borderRadius="md" borderWidth={1} borderColor={previousComparison.color} w="full">
-                    <HStack spacing={3} align="center">
-                      <Icon as={previousComparison.icon} color={previousComparison.color} boxSize={5} />
-                      <VStack align="start" spacing={1} flex={1}>
-                        <HStack>
-                          <Text fontSize="sm" fontWeight="bold" color={previousComparison.color}>
-                            {previousComparison.label}
-                          </Text>
-                          <Badge colorScheme={previousTimeDiff < 0 ? 'green' : previousTimeDiff > 0 ? 'red' : 'gray'} size="sm">
-                            {previousTimeDiff < 0 ? '-' : '+'}{formatTimeDifference(previousTimeDiff)}
-                          </Badge>
-                        </HStack>
-                        <Text fontSize="xs" color="gray.600">
-                          {Math.abs((previousTimeDiff / previous.timeInSeconds) * 100).toFixed(2)}% change from previous race
-                        </Text>
-                      </VStack>
-                      <VStack align="end" spacing={0}>
-                        <Text fontSize="xs" color="gray.500">WA Points</Text>
-                        <Text fontSize="sm" fontWeight="bold">
-                          {mostRecent.waPoints} → {previous.waPoints}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                  </Box>
+                  <VStack spacing={2} align="center" w="full">
+                    <Text fontSize="lg" fontWeight="600" color={previousComparison.color}>
+                      {previousTimeDiff < 0 ? 'Faster' : previousTimeDiff > 0 ? 'Slower' : 'Same'} by {formatTimeDifference(Math.abs(previousTimeDiff))}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {Math.abs((previousTimeDiff / previous.timeInSeconds) * 100).toFixed(2)}% {previousTimeDiff < 0 ? 'improvement' : 'slower'}
+                    </Text>
+                  </VStack>
                 )}
               </VStack>
-            </CardBody>
-          </Card>
-        )}
+            </Card>
+          )}
 
-        {/* Most Recent vs Personal Best Card */}
-        {personalBest && (
-          <Card bg={cardBg} borderWidth={1} borderColor={borderColor}>
-            <CardHeader pb={2}>
-              <HStack justify="space-between">
-                <Heading size="sm" color="orange.600">
-                  <Icon as={StarIcon} mr={2} />
-                  Recent vs Personal Best
-                </Heading>
-                <Badge colorScheme="orange" variant="subtle">
-                  PB Comparison
-                </Badge>
-              </HStack>
-            </CardHeader>
-            <CardBody pt={0}>
+          {personalBest && !previous && (
+            <Card 
+              bg="linear-gradient(135deg, #fff8f0 0%, #fff0e6 100%)" 
+              borderRadius="xl" 
+              p={5}
+              shadow="md"
+              borderWidth="1px"
+              borderColor="orange.100"
+            >
               <VStack spacing={4}>
-                {/* Time Comparison */}
-                <HStack spacing={4} align="stretch" w="full">
-                  {/* Most Recent */}
-                  <Box flex={1} p={3} bg="primary.50" borderRadius="md" borderWidth={2} borderColor="primary.200" position="relative">
-                    <Badge position="absolute" top={1} right={1} colorScheme="primary" size="xs">
-                      {mostRecent.poolType}
-                    </Badge>
-                    <VStack spacing={1}>
-                      <Text fontSize="xs" color="gray.600" fontWeight="bold">MOST RECENT</Text>
-                      <Text fontSize="2xl" fontWeight="bold" color="primary.600">
-                        {mostRecent.time}
-                      </Text>
-                      <Text fontSize="xs" color="gray.500">
-                        {new Date(mostRecent.date).toLocaleDateString()}
-                      </Text>
-                      <Text fontSize="xs" color="gray.600" textAlign="center" noOfLines={2}>
-                        {mostRecent.meet}
-                      </Text>
-                    </VStack>
-                  </Box>
-
-                  {/* vs */}
-                  <Flex align="center" px={2}>
-                    <Text fontSize="sm" color="gray.400" fontWeight="bold">vs</Text>
-                  </Flex>
-
-                  {/* Personal Best */}
-                  <Box flex={1} p={3} bg="orange.50" borderRadius="md" borderWidth={2} borderColor="orange.200" position="relative">
-                    <Badge position="absolute" top={1} right={1} colorScheme="orange" size="xs">
-                      {personalBest.poolType}
-                    </Badge>
-                    <VStack spacing={1}>
-                      <Text fontSize="xs" color="gray.600" fontWeight="bold">PERSONAL BEST</Text>
-                      <Text fontSize="2xl" fontWeight="bold" color="orange.600">
-                        {personalBest.bestTime}
-                      </Text>
-                      <Text fontSize="xs" color="gray.500">
-                        {new Date(personalBest.date).toLocaleDateString()}
-                      </Text>
-                      <Text fontSize="xs" color="gray.600" textAlign="center" noOfLines={2}>
-                        {personalBest.meet}
-                      </Text>
-                      <Badge colorScheme="orange" size="sm">🥇 All-Time Best</Badge>
-                    </VStack>
-                  </Box>
+                <HStack spacing={2} align="center">
+                  <Icon as={TimeIcon} color="orange.500" boxSize={5} />
+                  <Heading size="md" color="orange.600" fontWeight="600">
+                    Recent vs Personal Best
+                  </Heading>
                 </HStack>
 
-                {/* Analysis */}
+                <HStack spacing={6} w="full" justify="center" align="center">
+                  <VStack spacing={2} align="center">
+                    <Text fontSize="sm" color="gray.600" fontWeight="500">Personal Best</Text>
+                    <Text fontSize="3xl" fontWeight="bold" color="orange.600">{personalBest.bestTime}</Text>
+                    <Text fontSize="sm" color="gray.500">{new Date(personalBest.date).toLocaleDateString()}</Text>
+                  </VStack>
+
+                  <Icon 
+                    as={pbComparison?.icon || MinusIcon} 
+                    color={pbComparison?.color || 'gray.400'}
+                    boxSize={8}
+                  />
+
+                  <VStack spacing={2} align="center">
+                    <Text fontSize="sm" color="gray.600" fontWeight="500">Recent</Text>
+                    <Text fontSize="3xl" fontWeight="bold" color="blue.600">{mostRecent.time}</Text>
+                    <Text fontSize="sm" color="gray.500">{new Date(mostRecent.date).toLocaleDateString()}</Text>
+                  </VStack>
+                </HStack>
+
                 {pbComparison && (
-                  <Box p={3} bg={pbComparison.bgColor} borderRadius="md" borderWidth={1} borderColor={pbComparison.color} w="full">
-                    <HStack spacing={3} align="center">
-                      <Icon as={pbComparison.icon} color={pbComparison.color} boxSize={5} />
-                      <VStack align="start" spacing={1} flex={1}>
-                        <HStack>
-                          <Text fontSize="sm" fontWeight="bold" color={pbComparison.color}>
-                            {pbTimeDiff < 0 ? 'New Personal Best!' : pbComparison.label}
-                          </Text>
-                          <Badge colorScheme={pbTimeDiff < 0 ? 'green' : pbTimeDiff > 0 ? 'red' : 'gray'} size="sm">
-                            {pbTimeDiff < 0 ? '-' : '+'}{formatTimeDifference(pbTimeDiff)}
-                          </Badge>
-                        </HStack>
-                        <Text fontSize="xs" color="gray.600">
-                          {pbTimeDiff < 0 
-                            ? `New PB by ${Math.abs((pbTimeDiff / personalBest.bestTimeSeconds) * 100).toFixed(2)}%`
-                            : `${Math.abs((pbTimeDiff / personalBest.bestTimeSeconds) * 100).toFixed(2)}% off personal best`
-                          }
-                        </Text>
-                      </VStack>
-                      <VStack align="end" spacing={0}>
-                        <Text fontSize="xs" color="gray.500">WA Points</Text>
-                        <Text fontSize="sm" fontWeight="bold">
-                          {mostRecent.waPoints} → {personalBest.waPoints}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                  </Box>
+                  <VStack spacing={2} align="center" w="full">
+                    <Text fontSize="lg" fontWeight="600" color={pbComparison.color}>
+                      {pbTimeDiff < 0 ? 'New Personal Best!' : pbTimeDiff > 0 ? 'Off PB' : 'Tied PB'} 
+                      {pbTimeDiff !== 0 && ` by ${formatTimeDifference(Math.abs(pbTimeDiff))}`}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {pbTimeDiff < 0 
+                        ? `${Math.abs((pbTimeDiff / personalBest.bestTimeSeconds) * 100).toFixed(2)}% improvement`
+                        : pbTimeDiff > 0
+                        ? `${Math.abs((pbTimeDiff / personalBest.bestTimeSeconds) * 100).toFixed(2)}% off personal best`
+                        : 'Tied your personal best!'
+                      }
+                    </Text>
+                  </VStack>
                 )}
               </VStack>
-            </CardBody>
-          </Card>
-        )}
+            </Card>
+          )}
 
-        {/* No comparison data available */}
-        {!previous && !personalBest && (
-          <Card bg={cardBg} borderWidth={1} borderColor={borderColor}>
-            <CardBody textAlign="center" py={8}>
-              <VStack spacing={3}>
-                <Text fontSize="lg" fontWeight="bold" color="primary.600">
-                  {mostRecent.time}
-                </Text>
-                <Text fontSize="sm" color="gray.600">
-                  {distance}m {stroke} ({mostRecent.poolType})
-                </Text>
-                <Text fontSize="xs" color="gray.500">
-                  {new Date(mostRecent.date).toLocaleDateString()} • {mostRecent.meet}
-                </Text>
-                <Badge colorScheme="blue" size="sm">
-                  Only race for this event
-                </Badge>
+          {/* Single Race Card */}
+          {!previous && !personalBest && (
+            <Card 
+              bg="linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%)" 
+              borderRadius="xl" 
+              p={6}
+              shadow="md"
+              borderWidth="1px"
+              borderColor="blue.100"
+            >
+              <VStack spacing={4}>
+                <HStack spacing={2} align="center">
+                  <Icon as={TimeIcon} color="blue.500" boxSize={5} />
+                  <Heading size="md" color="blue.600" fontWeight="600">
+                    Recent Performance
+                  </Heading>
+                </HStack>
+
+                <VStack spacing={3} align="center">
+                  <Text fontSize="4xl" fontWeight="bold" color="blue.600">{mostRecent.time}</Text>
+                  <Text fontSize="lg" fontWeight="600" color="gray.700">{distance}m {stroke}</Text>
+                  <Text fontSize="sm" color="gray.500">{new Date(mostRecent.date).toLocaleDateString()}</Text>
+                  {mostRecent.isPersonalBest && (
+                    <Text fontSize="sm" color="green.600" fontWeight="600">🏆 Personal Best!</Text>
+                  )}
+                </VStack>
               </VStack>
-            </CardBody>
-          </Card>
-        )}
-      </SimpleGrid>
-    </VStack>
+            </Card>
+          )}
+        </VStack>
+      )}
+
+      {/* Event Info Footer */}
+      <HStack spacing={1} align="center" justify="center" color="gray.500" fontSize="xs" mt={3}>
+        <Icon as={TimeIcon} boxSize={3} />
+        <Text>{distance}m {stroke} • {mostRecent.poolType}</Text>
+      </HStack>
+    </Box>
   )
   } catch (error) {
     console.error('Error in RecentPerformanceComparison:', error)
     return (
-      <Card bg="red.50" borderColor="red.200" borderWidth="1px">
-        <CardBody>
-          <Text color="red.600">Error loading performance comparison</Text>
-        </CardBody>
-      </Card>
+      <Box maxW="600px" mx="auto">
+        <Card 
+          bg="linear-gradient(135deg, #fff8f8 0%, #fff0f0 100%)" 
+          borderRadius="2xl" 
+          p={8}
+          shadow="lg"
+          borderWidth="1px"
+          borderColor="red.100"
+        >
+          <VStack spacing={4} align="center">
+            <Icon as={TimeIcon} color="red.300" boxSize={12} />
+            <Heading size="md" color="red.600" textAlign="center">
+              Recent Performance Comparison
+            </Heading>
+            <Text color="red.600" textAlign="center">
+              Error loading performance comparison
+            </Text>
+          </VStack>
+        </Card>
+      </Box>
     )
   }
 }

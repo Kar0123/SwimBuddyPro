@@ -22,12 +22,17 @@ import {
   Skeleton,
   SimpleGrid,
   Wrap,
-  WrapItem
+  WrapItem,
+  Select,
+  ButtonGroup,
+  IconButton
 } from '@chakra-ui/react'
 import { 
   DownloadIcon,
   TriangleUpIcon,
-  TriangleDownIcon
+  TriangleDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@chakra-ui/icons'
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
@@ -82,6 +87,10 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
   // Table states
   const [sortField, setSortField] = useState<SortField>('date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [recordsPerPage, setRecordsPerPage] = useState<number>(25)
 
   const cardBg = useColorModeValue('white', 'gray.700')
   const headerBg = useColorModeValue('gray.50', 'gray.600')
@@ -153,6 +162,23 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
 
     return filtered
   }, [records, selectedStrokes, selectedDistances, selectedPoolTypes, sortField, sortDirection])
+
+  // Pagination calculations
+  const totalRecords = filteredRecords.length
+  const totalPages = Math.ceil(totalRecords / recordsPerPage)
+  const startIndex = (currentPage - 1) * recordsPerPage
+  const endIndex = startIndex + recordsPerPage
+  const currentRecords = filteredRecords.slice(startIndex, endIndex)
+
+  // Reset pagination when filters change
+  const resetPagination = () => {
+    setCurrentPage(1)
+  }
+
+  // Update currentPage when filters change
+  useMemo(() => {
+    resetPagination()
+  }, [selectedStrokes, selectedDistances, selectedPoolTypes])
 
   // Calculate statistics based on filtered data
   const statistics = useMemo(() => {
@@ -696,151 +722,257 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
       </CardHeader>
 
       <CardBody>
-        {/* Results Header */}
+        {/* Results Header with Pagination Info */}
         <HStack justify="space-between" align="center" mb={4}>
           <HStack>
             <Text fontSize="lg" fontWeight="bold" color="blue.600">
-              🏊‍♀️ Long Course (50m Pool)
+              🏊‍♀️ Swimming Results
             </Text>
             <Badge colorScheme="blue" variant="outline">
-              {filteredRecords.filter(r => r.poolType === 'LC').length} OF {statistics.longCourseRaces + (records.filter(r => r.poolType === 'LC').length - statistics.longCourseRaces)} RESULTS
+              SHOWING {startIndex + 1}-{Math.min(endIndex, totalRecords)} OF {totalRecords} RESULTS
             </Badge>
+          </HStack>
+          
+          {/* Records per page selector */}
+          <HStack spacing={3}>
+            <Text fontSize="sm" color="gray.600">Show:</Text>
+            <Select 
+              value={recordsPerPage} 
+              onChange={(e) => {
+                setRecordsPerPage(Number(e.target.value))
+                setCurrentPage(1)
+              }}
+              size="sm" 
+              width="80px"
+              bg="white"
+            >
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={totalRecords}>All</option>
+            </Select>
+            <Text fontSize="sm" color="gray.600">per page</Text>
           </HStack>
         </HStack>
 
-        {filteredRecords.length > 0 ? (
-          <TableContainer>
-            <Table variant="simple" size="sm">
-              <Thead bg={headerBg}>
-                <Tr>
-                  <Th 
-                    cursor="pointer" 
-                    onClick={() => handleSort('stroke')}
-                    _hover={{ bg: hoverBg }}
-                  >
-                    <HStack spacing={1}>
-                      <Text>EVENT</Text>
-                      {getSortIcon('stroke')}
-                    </HStack>
-                  </Th>
-                  <Th 
-                    cursor="pointer" 
-                    onClick={() => handleSort('time')}
-                    _hover={{ bg: hoverBg }}
-                  >
-                    <HStack spacing={1}>
-                      <Text>TIME</Text>
-                      {getSortIcon('time')}
-                    </HStack>
-                  </Th>
-                  <Th 
-                    cursor="pointer" 
-                    onClick={() => handleSort('waPoints')}
-                    _hover={{ bg: hoverBg }}
-                  >
-                    <HStack spacing={1}>
-                      <Text>WA POINTS</Text>
-                      {getSortIcon('waPoints')}
-                    </HStack>
-                  </Th>
-                  <Th 
-                    cursor="pointer" 
-                    onClick={() => handleSort('date')}
-                    _hover={{ bg: hoverBg }}
-                  >
-                    <HStack spacing={1}>
-                      <Text>DATE</Text>
-                      {getSortIcon('date')}
-                    </HStack>
-                  </Th>
-                  <Th 
-                    cursor="pointer" 
-                    onClick={() => handleSort('meet')}
-                    _hover={{ bg: hoverBg }}
-                  >
-                    <HStack spacing={1}>
-                      <Text>MEET NAME</Text>
-                      {getSortIcon('meet')}
-                    </HStack>
-                  </Th>
-                  <Th 
-                    cursor="pointer" 
-                    onClick={() => handleSort('venue')}
-                    _hover={{ bg: hoverBg }}
-                  >
-                    <HStack spacing={1}>
-                      <Text>VENUE</Text>
-                      {getSortIcon('venue')}
-                    </HStack>
-                  </Th>
-                  <Th>ROUND</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {filteredRecords.map((record, index) => (
-                  <MotionTr
-                    key={record.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.02 }}
-                    _hover={{ bg: hoverBg }}
-                  >
-                    <Td>
-                      <HStack>
-                        <Badge
-                          colorScheme={getStrokeColor(record.stroke)}
-                          variant="solid"
+        {currentRecords.length > 0 ? (
+          <>
+            <TableContainer>
+              <Table variant="simple" size="sm">
+                <Thead bg={headerBg}>
+                  <Tr>
+                    <Th 
+                      cursor="pointer" 
+                      onClick={() => handleSort('stroke')}
+                      _hover={{ bg: hoverBg }}
+                    >
+                      <HStack spacing={1}>
+                        <Text>EVENT</Text>
+                        {getSortIcon('stroke')}
+                      </HStack>
+                    </Th>
+                    <Th 
+                      cursor="pointer" 
+                      onClick={() => handleSort('time')}
+                      _hover={{ bg: hoverBg }}
+                    >
+                      <HStack spacing={1}>
+                        <Text>TIME</Text>
+                        {getSortIcon('time')}
+                      </HStack>
+                    </Th>
+                    <Th 
+                      cursor="pointer" 
+                      onClick={() => handleSort('waPoints')}
+                      _hover={{ bg: hoverBg }}
+                    >
+                      <HStack spacing={1}>
+                        <Text>WA POINTS</Text>
+                        {getSortIcon('waPoints')}
+                      </HStack>
+                    </Th>
+                    <Th 
+                      cursor="pointer" 
+                      onClick={() => handleSort('date')}
+                      _hover={{ bg: hoverBg }}
+                    >
+                      <HStack spacing={1}>
+                        <Text>DATE</Text>
+                        {getSortIcon('date')}
+                      </HStack>
+                    </Th>
+                    <Th 
+                      cursor="pointer" 
+                      onClick={() => handleSort('meet')}
+                      _hover={{ bg: hoverBg }}
+                    >
+                      <HStack spacing={1}>
+                        <Text>MEET NAME</Text>
+                        {getSortIcon('meet')}
+                      </HStack>
+                    </Th>
+                    <Th 
+                      cursor="pointer" 
+                      onClick={() => handleSort('venue')}
+                      _hover={{ bg: hoverBg }}
+                    >
+                      <HStack spacing={1}>
+                        <Text>VENUE</Text>
+                        {getSortIcon('venue')}
+                      </HStack>
+                    </Th>
+                    <Th>ROUND</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {currentRecords.map((record, index) => (
+                    <MotionTr
+                      key={record.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.02 }}
+                      _hover={{ bg: hoverBg }}
+                    >
+                      <Td>
+                        <HStack>
+                          <Badge
+                            colorScheme={getStrokeColor(record.stroke)}
+                            variant="solid"
+                            size="sm"
+                          >
+                            🏊 {record.stroke.toUpperCase()}
+                          </Badge>
+                          <Text fontWeight="bold">
+                            {record.distance}m
+                          </Text>
+                        </HStack>
+                      </Td>
+                      <Td>
+                        <Text fontWeight="bold" fontSize="lg" color="primary.600">
+                          {record.time}
+                        </Text>
+                      </Td>
+                      <Td>
+                        <Badge colorScheme="orange" variant="solid" fontSize="sm" px={2} py={1}>
+                          {record.waPoints}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <Text fontSize="sm">
+                          {formatDate(record.date)}
+                        </Text>
+                      </Td>
+                      <Td>
+                        <Text fontSize="sm" noOfLines={2} maxW="200px">
+                          {record.meet}
+                        </Text>
+                      </Td>
+                      <Td>
+                        <HStack>
+                          <Text fontSize="xs">🔴</Text>
+                          <Text fontSize="sm" noOfLines={1} maxW="150px">
+                            {record.venue}
+                          </Text>
+                        </HStack>
+                      </Td>
+                      <Td>
+                        <Badge 
+                          colorScheme={record.roundType?.toLowerCase().includes('final') ? 'green' : 'orange'} 
+                          variant="outline"
                           size="sm"
                         >
-                          🏊 {record.stroke.toUpperCase()}
+                          {getRoundTypeDisplayName(record.roundType)}
                         </Badge>
-                        <Text fontWeight="bold">
-                          {record.distance}m
-                        </Text>
-                      </HStack>
-                    </Td>
-                    <Td>
-                      <Text fontWeight="bold" fontSize="lg" color="primary.600">
-                        {record.time}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Badge colorScheme="orange" variant="solid" fontSize="sm" px={2} py={1}>
-                        {record.waPoints}
-                      </Badge>
-                    </Td>
-                    <Td>
-                      <Text fontSize="sm">
-                        {formatDate(record.date)}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Text fontSize="sm" noOfLines={2} maxW="200px">
-                        {record.meet}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <HStack>
-                        <Text fontSize="xs">🔴</Text>
-                        <Text fontSize="sm" noOfLines={1} maxW="150px">
-                          {record.venue}
-                        </Text>
-                      </HStack>
-                    </Td>
-                    <Td>
-                      <Badge 
-                        colorScheme={record.roundType?.toLowerCase().includes('final') ? 'green' : 'orange'} 
-                        variant="outline"
-                        size="sm"
+                      </Td>
+                    </MotionTr>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <Box p={4} bg={headerBg} borderRadius="md">
+                <VStack spacing={4}>
+                  <HStack justify="space-between" w="full" align="center">
+                    <Text fontSize="sm" color="gray.600">
+                      Page {currentPage} of {totalPages} • Showing {startIndex + 1}-{Math.min(endIndex, totalRecords)} of {totalRecords} results
+                    </Text>
+                    
+                    <HStack spacing={2}>
+                      <Text fontSize="sm" color="gray.600">Records per page:</Text>
+                      <Select 
+                        value={recordsPerPage} 
+                        onChange={(e) => {
+                          setRecordsPerPage(Number(e.target.value))
+                          setCurrentPage(1)
+                        }}
+                        size="sm" 
+                        width="80px"
+                        bg="white"
                       >
-                        {getRoundTypeDisplayName(record.roundType)}
-                      </Badge>
-                    </Td>
-                  </MotionTr>
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                        <option value={totalRecords}>All</option>
+                      </Select>
+                    </HStack>
+                  </HStack>
+
+                  <HStack spacing={2}>
+                    <IconButton
+                      aria-label="Previous page"
+                      icon={<ChevronLeftIcon />}
+                      size="sm"
+                      isDisabled={currentPage === 1}
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      variant="outline"
+                    />
+                    
+                    <ButtonGroup size="sm" variant="outline" spacing={1}>
+                      {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
+                        let pageNumber: number
+                        
+                        if (totalPages <= 7) {
+                          pageNumber = i + 1
+                        } else if (currentPage <= 4) {
+                          pageNumber = i + 1
+                        } else if (currentPage >= totalPages - 3) {
+                          pageNumber = totalPages - 6 + i
+                        } else {
+                          pageNumber = currentPage - 3 + i
+                        }
+                        
+                        const isCurrentPage = pageNumber === currentPage
+                        
+                        return (
+                          <Button
+                            key={pageNumber}
+                            onClick={() => setCurrentPage(pageNumber)}
+                            variant={isCurrentPage ? "solid" : "outline"}
+                            colorScheme={isCurrentPage ? "blue" : "gray"}
+                            size="sm"
+                            minW="40px"
+                          >
+                            {pageNumber}
+                          </Button>
+                        )
+                      })}
+                    </ButtonGroup>
+                    
+                    <IconButton
+                      aria-label="Next page"
+                      icon={<ChevronRightIcon />}
+                      size="sm"
+                      isDisabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      variant="outline"
+                    />
+                  </HStack>
+                </VStack>
+              </Box>
+            )}
+          </>
         ) : (
           <Box textAlign="center" py={8}>
             <Text fontSize="lg" color="gray.500" mb={2}>

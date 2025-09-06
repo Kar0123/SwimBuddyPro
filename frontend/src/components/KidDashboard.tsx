@@ -1,7 +1,5 @@
 import {
   Box,
-  Grid,
-  GridItem,
   VStack,
   HStack,
   Card,
@@ -17,14 +15,14 @@ import {
   SimpleGrid
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import { useState, useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import type { SwimmerData } from '../services/api'
 import { EnhancedPerformanceChart } from './EnhancedPerformanceChart'
 import { PersonalBestsCards } from './PersonalBestsCards'
 import { RaceHistoryTable } from './RaceHistoryTable'
-import { RecentPerformanceComparison } from './RecentPerformanceComparison'
 import PerformanceSummaryCards from './PerformanceSummaryCards'
-import { ErrorBoundary } from './ErrorBoundary'
+import { SkeletonDashboard } from './skeletons/AdvancedSkeletons'
+import { SwimmingLoader } from './animations/SwimmingLoaders'
 
 const MotionBox = motion(Box)
 
@@ -38,48 +36,27 @@ export const KidDashboard = ({ swimmer, isLoading }: KidDashboardProps) => {
   const statBg = useColorModeValue('gray.50', 'gray.600')
   const accentColor = useColorModeValue('primary.500', 'primary.300')
 
-  // Chart filter state for Recent Performance Comparison
-  const [chartFilters, setChartFilters] = useState({
-    distance: '50',
-    stroke: 'Freestyle',
-    poolType: 'Long Course (LC)'
-  })
-
-  // Handle filter changes from Performance Chart with memoization
-  const handleFilterChange = useCallback((distance: string, stroke: string, poolType: string) => {
-    setChartFilters(prev => {
-      // Only update if values actually changed
-      if (prev.distance === distance && prev.stroke === stroke && prev.poolType === poolType) {
-        return prev
-      }
-      return { distance, stroke, poolType }
-    })
+  // Handle filter changes from Performance Chart with memoization  
+  const handleFilterChange = useCallback((_distance: string, _stroke: string, _poolType: string) => {
+    // This callback is passed to the chart component but we don't need to track state here
+    // since the comparison is now integrated inside the chart component
   }, [])
-
-  // Memoize the RecentPerformanceComparison props to prevent unnecessary re-renders
-  const performanceComparisonProps = useMemo(() => ({
-    records: swimmer.records,
-    personalBests: swimmer.personalBests,
-    selectedDistance: chartFilters.distance,
-    selectedStroke: chartFilters.stroke,
-    selectedPoolType: chartFilters.poolType
-  }), [swimmer.records, swimmer.personalBests, chartFilters.distance, chartFilters.stroke, chartFilters.poolType])
 
   if (isLoading || !swimmer) {
     return (
-      <VStack spacing={6} align="stretch">
-        <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <MotionBox 
-              key={i} 
-              h="120px" 
-              bg={cardBg} 
-              borderRadius="lg" 
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          ))}
-        </Grid>
+      <VStack spacing={8} align="stretch">
+        {/* Centered loading animation */}
+        <Flex justify="center" align="center" py={8}>
+          <VStack spacing={4}>
+            <SwimmingLoader type="fish" size="60px" color="blue.500" />
+            <Text fontSize="md" color="gray.500">
+              Loading swimmer dashboard...
+            </Text>
+          </VStack>
+        </Flex>
+        
+        {/* Advanced skeleton dashboard */}
+        <SkeletonDashboard />
       </VStack>
     )
   }
@@ -193,54 +170,52 @@ export const KidDashboard = ({ swimmer, isLoading }: KidDashboardProps) => {
         <PersonalBestsCards tiref={swimmer.tiref} />
       </MotionBox>
 
-      {/* Main Content Grid */}
-      <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
-        {/* Performance Charts */}
-        <GridItem>
-          <MotionBox
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+      {/* Performance Analytics Section - Full Width */}
+      <MotionBox
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <VStack spacing={8} align="stretch">
+          {/* Section Header */}
+          <HStack spacing={4} align="center">
+            <Box 
+              bg="purple.100" 
+              p={3} 
+              borderRadius="xl"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontSize="2xl">📊</Text>
+            </Box>
+            <VStack align="start" spacing={1}>
+              <Text fontSize="2xl" fontWeight="black" color="purple.700" letterSpacing="tight">
+                Performance Analytics
+              </Text>
+              <Text fontSize="md" color="gray.600" fontWeight="medium">
+                Interactive charts and performance comparisons
+              </Text>
+            </VStack>
+          </HStack>
+
+          {/* Chart Section */}
+          <Box
+            bg={cardBg}
+            borderRadius="2xl"
+            shadow="lg"
+            borderWidth="2px"
+            borderColor={useColorModeValue('purple.200', 'purple.600')}
+            overflow="hidden"
           >
             <EnhancedPerformanceChart 
               records={swimmer.records}
               personalBests={swimmer.personalBests}
               onFilterChange={handleFilterChange}
             />
-          </MotionBox>
-        </GridItem>
-
-        {/* Recent Activity & Quick Stats */}
-        <GridItem>
-          <VStack spacing={6} align="stretch">
-            {/* Recent Performance Comparison */}
-            <MotionBox
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <Card bg={cardBg}>
-                <CardHeader>
-                  <Heading size="md" color="primary.600">
-                    Recent Performance Comparison
-                  </Heading>
-                </CardHeader>
-                <CardBody>
-                  {swimmer.records && swimmer.personalBests ? (
-                    <ErrorBoundary>
-                      <RecentPerformanceComparison
-                        {...performanceComparisonProps}
-                      />
-                    </ErrorBoundary>
-                  ) : (
-                    <Text color="gray.500">Loading performance data...</Text>
-                  )}
-                </CardBody>
-              </Card>
-            </MotionBox>
-          </VStack>
-        </GridItem>
-      </Grid>
+          </Box>
+        </VStack>
+      </MotionBox>
 
       {/* Recent Races Section */}
       <MotionBox

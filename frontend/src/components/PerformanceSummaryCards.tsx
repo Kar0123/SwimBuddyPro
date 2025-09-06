@@ -1,198 +1,212 @@
 import React from 'react'
 import {
   Box,
-  Grid,
-  GridItem,
   Text,
   VStack,
   HStack,
   Icon,
   useColorModeValue,
+  Circle,
+  SimpleGrid,
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import { TimeIcon, StarIcon, SearchIcon, CalendarIcon } from '@chakra-ui/icons'
+import { TimeIcon, StarIcon, SearchIcon } from '@chakra-ui/icons'
 import type { SwimRecord } from '../services/api'
-
-const MotionBox = motion(Box)
 
 interface PerformanceSummaryCardsProps {
   records: SwimRecord[]
 }
 
 const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ records }) => {
-  const bg = useColorModeValue('white', 'gray.800')
+  const textColor = useColorModeValue('gray.700', 'gray.200')
+  const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   // Calculate statistics from real data
   const totalSwims = records.length
   const differentStrokes = new Set(records.map(record => record.stroke)).size
   
-  // Find stroke with maximum WA points
+  // Find best stroke (highest WA points)
   const bestWAPoints = Math.max(...records.map(record => record.waPoints), 0)
   const bestRecord = records.find(record => record.waPoints === bestWAPoints)
   const bestStroke = bestRecord ? bestRecord.stroke : 'N/A'
-  
+
+  // Bottom row stats
   const distances = new Set(records.map(record => record.distance)).size
   const venues = new Set(records.map(record => record.venue)).size
   const meets = new Set(records.map(record => record.meet)).size
 
+  // Main performance cards
   const mainCards = [
     {
       title: 'Total Swims',
-      value: totalSwims,
-      description: 'Races completed across all events',
-      icon: CalendarIcon,
-      bg: 'blue.50',
+      subtitle: 'Races completed across all events',
+      value: totalSwims.toString(),
+      icon: TimeIcon,
+      bgColor: 'blue.50',
       iconBg: 'blue.100',
       iconColor: 'blue.500',
-      borderTop: 'blue.400',
+      numberColor: 'blue.600',
     },
     {
       title: 'Different Strokes',
-      value: differentStrokes,
-      description: 'Swimming styles mastered',
+      subtitle: 'Swimming styles mastered',
+      value: differentStrokes.toString(),
       icon: SearchIcon,
-      bg: 'purple.50',
+      bgColor: 'purple.50',
       iconBg: 'purple.100',
       iconColor: 'purple.500',
-      borderTop: 'purple.400',
+      numberColor: 'purple.600',
     },
     {
-      title: 'Best Stroke',
-      value: `${bestStroke} - ${bestWAPoints}`,
-      description: 'Highest WA points stroke',
+      title: 'Personal Bests',
+      subtitle: `Best in ${bestStroke}`,
+      value: bestWAPoints.toString(),
       icon: StarIcon,
-      bg: 'teal.50',
-      iconBg: 'teal.100',
-      iconColor: 'teal.500',
-      borderTop: 'teal.400',
+      bgColor: 'green.50',
+      iconBg: 'green.100',
+      iconColor: 'green.500',
+      numberColor: 'green.600',
     },
   ]
 
-  const statsCards = [
+  // Bottom stats
+  const bottomStats = [
     { label: 'Best WA Points', value: bestWAPoints, color: 'green.500' },
     { label: 'Distances', value: distances, color: 'orange.500' },
     { label: 'Venues', value: venues, color: 'pink.500' },
-    { label: 'Meets', value: meets, color: 'blue.500' },
+    { label: 'Meets', value: meets, color: 'cyan.500' },
   ]
 
   return (
     <Box>
       {/* Header */}
-      <HStack mb={6} spacing={3}>
-        <Icon as={TimeIcon} color="blue.500" boxSize={6} />
-        <Text fontSize="xl" fontWeight="bold" color="blue.600">
-          Performance Summary
-        </Text>
+      <HStack mb={6} spacing={4} align="center">
+        <Box
+          bg="blue.500"
+          color="white"
+          px={4}
+          py={2}
+          borderRadius="md"
+          fontWeight="bold"
+          fontSize="lg"
+        >
+          📊 Performance Summary
+        </Box>
       </HStack>
 
-      {/* Main Cards Grid */}
-      <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6} mb={6}>
-        {mainCards.map((card, index) => (
-          <GridItem key={card.title}>
-            <MotionBox
-              bg={bg}
-              borderRadius="xl"
-              border="1px solid"
-              borderColor={borderColor}
-              borderTop="4px solid"
-              borderTopColor={card.borderTop}
-              p={6}
-              shadow="sm"
+      <VStack spacing={6} align="stretch">
+        {/* Main Cards - Top Row */}
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+          {mainCards.map((card, index) => (
+            <motion.div
+              key={card.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              _hover={{
-                shadow: 'md',
-                transform: 'translateY(-2px)',
-                transition: 'all 0.2s ease-in-out',
-              }}
             >
-              <VStack spacing={4} align="center">
-                {/* Icon */}
-                <Box
+              <Box
+                bg={card.bgColor}
+                borderRadius="2xl"
+                border="1px solid"
+                borderColor={borderColor}
+                p={8}
+                textAlign="center"
+                shadow="sm"
+                _hover={{
+                  shadow: 'md',
+                  transform: 'translateY(-2px)',
+                  transition: 'all 0.2s ease-in-out',
+                }}
+              >
+                {/* Icon in Circle */}
+                <Circle
+                  size="80px"
                   bg={card.iconBg}
-                  p={3}
-                  borderRadius="full"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
+                  mx="auto"
+                  mb={6}
                 >
-                  <Icon as={card.icon} boxSize={6} color={card.iconColor} />
-                </Box>
+                  <Icon as={card.icon} boxSize={10} color={card.iconColor} />
+                </Circle>
 
-                {/* Value */}
+                {/* Large Number */}
                 <Text
-                  fontSize="4xl"
+                  fontSize="5xl"
                   fontWeight="bold"
-                  color="gray.800"
+                  color={card.numberColor}
                   lineHeight="1"
+                  mb={2}
                 >
                   {card.value}
                 </Text>
 
                 {/* Title */}
                 <Text
-                  fontSize="lg"
+                  fontSize="xl"
                   fontWeight="semibold"
-                  color="gray.700"
-                  textAlign="center"
+                  color={textColor}
+                  mb={2}
                 >
                   {card.title}
                 </Text>
 
-                {/* Description */}
+                {/* Subtitle */}
                 <Text
                   fontSize="sm"
                   color="gray.500"
-                  textAlign="center"
                   lineHeight="1.4"
                 >
-                  {card.description}
+                  {card.subtitle}
                 </Text>
-              </VStack>
-            </MotionBox>
-          </GridItem>
-        ))}
-      </Grid>
+              </Box>
+            </motion.div>
+          ))}
+        </SimpleGrid>
 
-      {/* Stats Row */}
-      <Grid templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap={4}>
-        {statsCards.map((stat, index) => (
-          <GridItem key={stat.label}>
-            <MotionBox
-              bg={bg}
-              borderRadius="lg"
-              border="1px solid"
-              borderColor={borderColor}
-              p={4}
-              textAlign="center"
-              shadow="sm"
+        {/* Bottom Stats Row */}
+        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+          {bottomStats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
-              _hover={{
-                shadow: 'md',
-                transform: 'scale(1.02)',
-                transition: 'all 0.2s ease-in-out',
-              }}
+              transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
             >
-              <Text
-                fontSize="2xl"
-                fontWeight="bold"
-                color={stat.color}
-                lineHeight="1"
-                mb={1}
+              <Box
+                bg={cardBg}
+                borderRadius="lg"
+                border="1px solid"
+                borderColor={borderColor}
+                p={4}
+                textAlign="center"
+                shadow="sm"
+                _hover={{
+                  shadow: 'md',
+                  borderColor: stat.color,
+                  transition: 'all 0.2s ease-in-out',
+                }}
               >
-                {stat.value}
-              </Text>
-              <Text fontSize="sm" color="gray.600" fontWeight="medium">
-                {stat.label}
-              </Text>
-            </MotionBox>
-          </GridItem>
-        ))}
-      </Grid>
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  color={stat.color}
+                  lineHeight="1"
+                  mb={1}
+                >
+                  {stat.value}
+                </Text>
+                <Text
+                  fontSize="sm"
+                  color="gray.500"
+                  fontWeight="medium"
+                >
+                  {stat.label}
+                </Text>
+              </Box>
+            </motion.div>
+          ))}
+        </SimpleGrid>
+      </VStack>
     </Box>
   )
 }
