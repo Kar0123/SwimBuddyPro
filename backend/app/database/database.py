@@ -274,20 +274,33 @@ class SwimmerDatabase:
             bests = []
             
             for row in rows:
-                bests.append(PersonalBest(
-                    tiref=row['tiref'],
-                    event_name=row['event_name'],
-                    stroke=row['stroke'],
-                    distance=row['distance'],
-                    pool_type=row['pool_type'],
-                    best_time=row['best_time'],
-                    best_time_seconds=row['best_time_seconds'],
-                    wa_points=row['wa_points'],
-                    meet_date=datetime.fromisoformat(row['meet_date']),
-                    venue=row['venue'],
-                    meet_name=row['meet_name'],
-                    improvement_from_previous=row['improvement_from_previous']
-                ))
+                try:
+                    # Handle potentially invalid date data
+                    meet_date = None
+                    if row['meet_date']:
+                        try:
+                            meet_date = datetime.fromisoformat(row['meet_date'])
+                        except (ValueError, TypeError) as e:
+                            logger.warning(f"Invalid meet_date '{row['meet_date']}' for PB {row['tiref']}: {e}")
+                            meet_date = None
+                    
+                    bests.append(PersonalBest(
+                        tiref=row['tiref'],
+                        event_name=row['event_name'],
+                        stroke=row['stroke'],
+                        distance=row['distance'],
+                        pool_type=row['pool_type'],
+                        best_time=row['best_time'],
+                        best_time_seconds=row['best_time_seconds'],
+                        wa_points=row['wa_points'],
+                        meet_date=meet_date,
+                        venue=row['venue'],
+                        meet_name=row['meet_name'],
+                        improvement_from_previous=row['improvement_from_previous']
+                    ))
+                except Exception as e:
+                    logger.error(f"Error creating PersonalBest object for row {row}: {e}")
+                    continue
             
             return bests
         finally:
@@ -320,6 +333,20 @@ class SwimmerDatabase:
                 
                 best_record = cursor.fetchone()
                 if best_record:
+                    # Validate and format the meet_date
+                    meet_date_value = best_record['meet_date']
+                    try:
+                        # Try to parse and format the date properly
+                        if meet_date_value:
+                            # If it's already a proper datetime string, parse and re-format
+                            parsed_date = datetime.fromisoformat(str(meet_date_value).replace('Z', '+00:00'))
+                            formatted_date = parsed_date.isoformat()
+                        else:
+                            formatted_date = None
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Invalid meet_date '{meet_date_value}' for record {best_record['tiref']}: {e}")
+                        formatted_date = None
+                    
                     # Insert or update personal best
                     cursor.execute("""
                         INSERT OR REPLACE INTO personal_bests 
@@ -335,7 +362,7 @@ class SwimmerDatabase:
                         best_record['time'],
                         best_record['time_seconds'],
                         best_record['wa_points'],
-                        best_record['meet_date'],
+                        formatted_date,
                         best_record['venue'],
                         best_record['meet_name'],
                         datetime.now()

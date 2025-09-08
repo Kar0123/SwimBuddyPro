@@ -69,6 +69,58 @@ export const swimmingTheme = extendTheme({
       800: '#9a3412',
       900: '#7c2d12',
     },
+    // Tropical turquoise for playful accents
+    turquoise: {
+      50: '#f0fdfa',
+      100: '#ccfbf1',
+      200: '#99f6e4',
+      300: '#5eead4',
+      400: '#2dd4bf',
+      500: '#14b8a6',
+      600: '#0d9488',
+      700: '#0f766e',
+      800: '#115e59',
+      900: '#134e4a',
+    },
+    // Sea foam for gentle highlights
+    seafoam: {
+      50: '#f0fdf9',
+      100: '#e6fffa',
+      200: '#b2f5ea',
+      300: '#81e6d9',
+      400: '#4fd1c7',
+      500: '#38b2ac',
+      600: '#319795',
+      700: '#2c7a7b',
+      800: '#285e61',
+      900: '#234e52',
+    },
+    // Tropical blue for vibrant elements
+    tropical: {
+      50: '#ecfeff',
+      100: '#cffafe',
+      200: '#a5f3fc',
+      300: '#67e8f9',
+      400: '#22d3ee',
+      500: '#06b6d4',
+      600: '#0891b2',
+      700: '#0e7490',
+      800: '#155e75',
+      900: '#164e63',
+    },
+    // Deep sea for darker elements
+    deepsea: {
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+    },
     // Modern success/improvement color
     success: {
       50: '#f0fdf4',
@@ -110,9 +162,11 @@ export const swimmingTheme = extendTheme({
     }
   },
   fonts: {
-    heading: "'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
-    body: "'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+    heading: "'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+    body: "'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
     mono: "'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace",
+    playful: "'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    aquatic: "'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   fontSizes: {
     xs: '0.75rem',
@@ -136,6 +190,65 @@ export const swimmingTheme = extendTheme({
     bold: 700,
     extrabold: 800,
     black: 900,
+  },
+  // Consistent corner radii across components
+  radii: {
+    none: '0',
+    sm: '8px',
+    md: '12px',
+    lg: '16px',
+    xl: '20px',
+    '2xl': '28px',
+    full: '9999px',
+  },
+  
+  layerStyles: {
+    glass: {
+      bg: 'rgba(255,255,255,0.75)',
+      backdropFilter: 'blur(14px) saturate(120%)',
+      WebkitBackdropFilter: 'blur(14px) saturate(120%)',
+      border: '1px solid',
+      borderColor: 'rgba(255,255,255,0.45)',
+      boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+      borderRadius: 'xl',
+      position: 'relative',
+      _before: {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        bgGradient: 'linear(to-br, whiteAlpha.200, transparent)',
+        borderRadius: 'inherit',
+      },
+    },
+    glassDark: {
+      bg: 'rgba(15,23,42,0.55)',
+      backdropFilter: 'blur(16px) saturate(120%)',
+      WebkitBackdropFilter: 'blur(16px) saturate(120%)',
+      border: '1px solid',
+      borderColor: 'rgba(255,255,255,0.12)',
+      boxShadow: '0 10px 40px rgba(0,0,0,0.35)',
+      borderRadius: 'xl',
+      position: 'relative',
+      _before: {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        bgGradient: 'linear(to-br, whiteAlpha.200, transparent)',
+        borderRadius: 'inherit',
+      },
+    },
+    glassSubtle: {
+      bg: 'rgba(255,255,255,0.35)',
+      backdropFilter: 'blur(8px) saturate(110%)',
+      WebkitBackdropFilter: 'blur(8px) saturate(110%)',
+      border: '1px solid',
+      borderColor: 'rgba(255,255,255,0.25)',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+      borderRadius: 'lg',
+      position: 'relative',
+    },
   },
   components: {
     Card: {
@@ -195,11 +308,120 @@ export const swimmingTheme = extendTheme({
             },
           },
         },
+        glass: {
+          container: {
+            bg: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%)',
+            backdropFilter: 'blur(32px) saturate(180%)',
+            borderWidth: '1px',
+            borderColor: 'rgba(255, 255, 255, 0.25)',
+            borderRadius: 'xl',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+            position: 'relative',
+            overflow: 'hidden',
+            _before: {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '1px',
+              bgGradient: 'linear(to-r, transparent, rgba(255, 255, 255, 0.6), transparent)',
+            },
+            _after: {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              bgGradient: 'radial(circle at 50% 0%, rgba(255, 255, 255, 0.1), transparent 70%)',
+              pointerEvents: 'none',
+            },
+            _hover: {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
+              borderColor: 'rgba(255, 255, 255, 0.4)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            },
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          },
+        },
+        'glass-dark': {
+          container: {
+            bg: 'linear-gradient(135deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.1) 100%)',
+            backdropFilter: 'blur(24px) saturate(150%)',
+            borderWidth: '1px',
+            borderColor: 'rgba(255, 255, 255, 0.15)',
+            borderRadius: 'xl',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+            _hover: {
+              transform: 'translateY(-4px)',
+              borderColor: 'rgba(255, 255, 255, 0.25)',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+            },
+          },
+        },
+      },
+    },
+    // Playful heading styles with water-themed fonts
+    Heading: {
+      baseStyle: {
+        fontFamily: 'heading',
+        fontWeight: '700',
+        lineHeight: '1.2',
+        color: 'turquoise.600',
+      },
+      sizes: {
+        xs: {
+          fontSize: 'md',
+          fontWeight: '600',
+        },
+        sm: {
+          fontSize: 'lg',
+          fontWeight: '600',
+        },
+        md: {
+          fontSize: 'xl',
+          fontWeight: '700',
+        },
+        lg: {
+          fontSize: '2xl',
+          fontWeight: '700',
+        },
+        xl: {
+          fontSize: '3xl',
+          fontWeight: '800',
+        },
+        '2xl': {
+          fontSize: '4xl',
+          fontWeight: '800',
+        },
+      },
+      variants: {
+        playful: {
+          fontFamily: 'heading',
+          color: 'tropical.500',
+          fontWeight: '700',
+          letterSpacing: '-0.025em',
+        },
+        aquatic: {
+          fontFamily: 'heading',
+          bgGradient: 'linear(to-r, turquoise.400, tropical.500)',
+          bgClip: 'text',
+          fontWeight: '700',
+          letterSpacing: '-0.025em',
+        },
+        ocean: {
+          color: 'ocean.600',
+          fontFamily: 'heading',
+          fontWeight: '600',
+          letterSpacing: '-0.02em',
+        },
       },
     },
     Button: {
       baseStyle: {
-        borderRadius: '16px',
+  borderRadius: 'lg',
         fontWeight: '600',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         position: 'relative',
@@ -227,6 +449,17 @@ export const swimmingTheme = extendTheme({
         },
       },
       variants: {
+        glass: {
+          bg: 'rgba(255,255,255,0.5)',
+          border: '1px solid rgba(255,255,255,0.6)',
+          backdropFilter: 'blur(10px)',
+          color: 'gray.800',
+          _hover: {
+            bg: 'rgba(255,255,255,0.6)',
+            transform: 'translateY(-2px)',
+          },
+          _active: { transform: 'translateY(0)' },
+        },
         solid: {
           bg: 'linear-gradient(135deg, primary.500, primary.600)',
           color: 'white',
@@ -253,13 +486,49 @@ export const swimmingTheme = extendTheme({
             boxShadow: '0 8px 25px rgba(14, 165, 233, 0.4)',
           },
         },
+        turquoise: {
+          bg: 'linear-gradient(135deg, turquoise.400, turquoise.600)',
+          color: 'white',
+          fontFamily: 'heading',
+          fontWeight: '600',
+          letterSpacing: '0.025em',
+          _hover: {
+            bg: 'linear-gradient(135deg, turquoise.500, turquoise.700)',
+            boxShadow: '0 8px 25px rgba(20, 184, 166, 0.4)',
+            transform: 'translateY(-2px)',
+          },
+        },
+        tropical: {
+          bg: 'linear-gradient(135deg, tropical.400, seafoam.500)',
+          color: 'white',
+          fontFamily: 'heading',
+          fontWeight: '600',
+          letterSpacing: '0.025em',
+          _hover: {
+            bg: 'linear-gradient(135deg, tropical.500, seafoam.600)',
+            boxShadow: '0 8px 25px rgba(34, 211, 238, 0.4)',
+            transform: 'translateY(-2px)',
+          },
+        },
+        coral: {
+          bg: 'linear-gradient(135deg, coral.400, coral.600)',
+          color: 'white',
+          fontFamily: 'heading',
+          fontWeight: '600',
+          letterSpacing: '0.025em',
+          _hover: {
+            bg: 'linear-gradient(135deg, coral.500, coral.700)',
+            boxShadow: '0 8px 25px rgba(251, 146, 60, 0.4)',
+            transform: 'translateY(-2px)',
+          },
+        },
       },
     },
     // Enhanced Input component with focus animations
     Input: {
       baseStyle: {
         field: {
-          borderRadius: '12px',
+          borderRadius: 'md',
           borderWidth: '2px',
           borderColor: 'gray.200',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -278,6 +547,19 @@ export const swimmingTheme = extendTheme({
         },
       },
       variants: {
+        glass: {
+          field: {
+            bg: 'rgba(255,255,255,0.6)',
+            backdropFilter: 'blur(10px)',
+            borderColor: 'whiteAlpha.500',
+            _hover: { borderColor: 'whiteAlpha.700' },
+            _focus: {
+              borderColor: 'aqua.500',
+              boxShadow: '0 0 0 3px rgba(0, 188, 212, 0.2)',
+              bg: 'rgba(255,255,255,0.7)'
+            },
+          },
+        },
         swimming: {
           field: {
             bg: 'rgba(255, 255, 255, 0.9)',
@@ -297,7 +579,7 @@ export const swimmingTheme = extendTheme({
       baseStyle: {
         container: {
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          borderRadius: '16px',
+          borderRadius: 'lg',
           p: 6,
           position: 'relative',
           overflow: 'hidden',
@@ -324,7 +606,7 @@ export const swimmingTheme = extendTheme({
           fontWeight: '800',
           fontSize: '2xl',
           color: 'primary.600',
-          transition: 'color 0.3s ease',
+          transition: 'color 0.3s ease, transform 0.45s cubic-bezier(0.2,0.8,0.2,1)',
         },
         label: {
           color: 'gray.600',
@@ -392,7 +674,7 @@ export const swimmingTheme = extendTheme({
     // Enhanced Badge component with animations
     Badge: {
       baseStyle: {
-        borderRadius: '8px',
+  borderRadius: 'sm',
         fontWeight: '600',
         fontSize: 'xs',
         textTransform: 'uppercase',
@@ -405,6 +687,12 @@ export const swimmingTheme = extendTheme({
         },
       },
       variants: {
+        glass: {
+          bg: 'rgba(255,255,255,0.4)',
+          color: 'gray.800',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255,255,255,0.65)',
+        },
         swimming: {
           bg: 'aqua.500',
           color: 'white',
@@ -559,6 +847,17 @@ export const swimmingTheme = extendTheme({
       '*': {
         scrollBehavior: 'smooth',
       },
+      // Reduced motion handling and helper selector for single entrance animations
+      '@media (prefers-reduced-motion: reduce)': {
+        '*': {
+          animation: 'none !important',
+          transition: 'none !important',
+        },
+      },
+      // Annotate elements with data-animated="entrance" to get a single entrance animation
+      '[data-animated="entrance"]': {
+        animation: 'entrance 0.9s cubic-bezier(0.2,0.8,0.2,1) 1',
+      },
       // Enhanced focus styles for accessibility
       '*:focus-visible': {
         outline: 'none',
@@ -596,12 +895,20 @@ export const swimmingTheme = extendTheme({
         opacity: 0
       }
     }
+    ,
+    entrance: {
+      '0%': { opacity: 0, transform: 'scale(0.98) translateY(6px)' },
+      '60%': { opacity: 1, transform: 'scale(1.02) translateY(-2px)' },
+      '100%': { opacity: 1, transform: 'scale(1) translateY(0)' },
+    }
   },
   animation: {
     wave: 'wave 2s ease-in-out infinite',
     pulse: 'pulse 2s infinite',
     float: 'float 3s ease-in-out infinite',
     ripple: 'ripple 0.6s ease-out'
+    ,
+    entrance: 'entrance 0.9s cubic-bezier(0.2,0.8,0.2,1) 1'
   },
   breakpoints: {
     base: '0px',

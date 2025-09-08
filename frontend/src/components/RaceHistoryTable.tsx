@@ -92,10 +92,8 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage, setRecordsPerPage] = useState<number>(25)
 
-  const cardBg = useColorModeValue('white', 'gray.700')
   const headerBg = useColorModeValue('gray.50', 'gray.600')
   const statBg = useColorModeValue('blue.50', 'blue.900')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
   const hoverBg = useColorModeValue('blue.50', 'blue.900')
 
   // Get unique values for filters
@@ -478,7 +476,7 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
 
   if (isLoading) {
     return (
-      <Card bg={cardBg}>
+      <Card variant="glass">
         <CardHeader>
           <Skeleton height="24px" width="300px" />
         </CardHeader>
@@ -495,9 +493,7 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
 
   return (
     <MotionCard 
-      bg={cardBg} 
-      borderWidth={1} 
-      borderColor={borderColor}
+      variant="glass"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -598,10 +594,12 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
             </Text>
           </HStack>
 
-          {/* Stroke Filters */}
-          <Box>
-            <Text fontSize="sm" fontWeight="medium" mb={2}>All Events ({records.length})</Text>
-            <Wrap spacing={2}>
+          {/* All Events/Stroke Filters - Same Line */}
+          <HStack spacing={4} align="center" wrap="wrap">
+            <Text fontSize="sm" fontWeight="medium" color="gray.700" minW="fit-content">
+              All Events ({records.length})
+            </Text>
+            <Wrap spacing={2} flex={1}>
               {strokes.map(stroke => {
                 const count = records.filter(r => r.stroke === stroke).length
                 const isSelected = selectedStrokes.includes(stroke)
@@ -620,12 +618,14 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
                 )
               })}
             </Wrap>
-          </Box>
+          </HStack>
 
-          {/* Distance Filters */}
-          <Box>
-            <Text fontSize="sm" fontWeight="medium" mb={2}>Distance:</Text>
-            <Wrap spacing={2}>
+          {/* Distance Filters - Same Line */}
+          <HStack spacing={4} align="center" wrap="wrap">
+            <Text fontSize="sm" fontWeight="medium" color="gray.700" minW="fit-content">
+              Distance:
+            </Text>
+            <Wrap spacing={2} flex={1}>
               {distanceCategories.map(category => {
                 const count = category.distances.reduce((sum, dist) => 
                   sum + records.filter(r => r.distance === dist).length, 0
@@ -654,12 +654,14 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
                 )
               })}
             </Wrap>
-          </Box>
+          </HStack>
 
-          {/* Pool Type Filters */}
-          <Box>
-            <Text fontSize="sm" fontWeight="medium" mb={2}>Pool Type:</Text>
-            <Wrap spacing={2}>
+          {/* Pool Type Filters - Same Line */}
+          <HStack spacing={4} align="center" wrap="wrap">
+            <Text fontSize="sm" fontWeight="medium" color="gray.700" minW="fit-content">
+              Pool Type:
+            </Text>
+            <Wrap spacing={2} flex={1}>
               <WrapItem>
                 <Button
                   size="sm"
@@ -683,7 +685,7 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
                 </Button>
               </WrapItem>
             </Wrap>
-          </Box>
+          </HStack>
 
           {/* Current Filters Display */}
           {(selectedStrokes.length > 0 || selectedDistances.length > 0 || selectedPoolTypes.length > 0) && (

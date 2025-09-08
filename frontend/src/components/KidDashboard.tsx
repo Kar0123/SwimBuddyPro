@@ -15,7 +15,6 @@ import {
   SimpleGrid
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import { useCallback } from 'react'
 import type { SwimmerData } from '../services/api'
 import { EnhancedPerformanceChart } from './EnhancedPerformanceChart'
 import { PersonalBestsCards } from './PersonalBestsCards'
@@ -36,11 +35,7 @@ export const KidDashboard = ({ swimmer, isLoading }: KidDashboardProps) => {
   const statBg = useColorModeValue('gray.50', 'gray.600')
   const accentColor = useColorModeValue('primary.500', 'primary.300')
 
-  // Handle filter changes from Performance Chart with memoization  
-  const handleFilterChange = useCallback((_distance: string, _stroke: string, _poolType: string) => {
-    // This callback is passed to the chart component but we don't need to track state here
-    // since the comparison is now integrated inside the chart component
-  }, [])
+
 
   if (isLoading || !swimmer) {
     return (
@@ -107,7 +102,7 @@ export const KidDashboard = ({ swimmer, isLoading }: KidDashboardProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card bg={cardBg} borderWidth={2} borderColor={accentColor}>
+        <Card variant="glass" borderWidth={2} borderColor={accentColor}>
           <CardBody>
             <Flex align="center">
               <Avatar
@@ -190,11 +185,11 @@ export const KidDashboard = ({ swimmer, isLoading }: KidDashboardProps) => {
               <Text fontSize="2xl">📊</Text>
             </Box>
             <VStack align="start" spacing={1}>
-              <Text fontSize="2xl" fontWeight="black" color="purple.700" letterSpacing="tight">
-                Performance Analytics
+              <Text fontSize="2xl" fontWeight="black" color="turquoise.700" letterSpacing="tight">
+                📈 Performance Analytics
               </Text>
               <Text fontSize="md" color="gray.600" fontWeight="medium">
-                Interactive charts and performance comparisons
+                Interactive charts and swimming progress over time
               </Text>
             </VStack>
           </HStack>
@@ -205,13 +200,13 @@ export const KidDashboard = ({ swimmer, isLoading }: KidDashboardProps) => {
             borderRadius="2xl"
             shadow="lg"
             borderWidth="2px"
-            borderColor={useColorModeValue('purple.200', 'purple.600')}
+            borderColor={useColorModeValue('turquoise.200', 'turquoise.600')}
             overflow="hidden"
           >
             <EnhancedPerformanceChart 
               records={swimmer.records}
               personalBests={swimmer.personalBests}
-              onFilterChange={handleFilterChange}
+              tiref={swimmer.tiref}
             />
           </Box>
         </VStack>
@@ -223,7 +218,7 @@ export const KidDashboard = ({ swimmer, isLoading }: KidDashboardProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
       >
-        <Card bg={cardBg}>
+        <Card variant="glass">
           <CardHeader>
             <Flex justify="space-between" align="center">
               <Heading size="md" color="primary.600">

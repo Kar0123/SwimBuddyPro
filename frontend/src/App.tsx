@@ -29,32 +29,32 @@ function App() {
   // Debug: Add event listeners to detect what might be clearing the swimmer data
   useEffect(() => {
     const handleBeforeUnload = (_e: BeforeUnloadEvent) => {
-      console.log('🔄 Page unload detected')
+      // Page unload detected (no-op)
     }
 
-    const handlePopState = (e: PopStateEvent) => {
-      console.log('🔄 Browser navigation detected:', e)
+    const handlePopState = (_e: PopStateEvent) => {
+      // Browser navigation detected (handled silently)
     }
 
     const handleScroll = () => {
-      // Only log if we're at the bottom of the page
+      // Silent scroll handler to detect bottom-of-page if needed
       const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100
       if (isAtBottom && currentSwimmer) {
-        console.log('📜 Scrolled to bottom with current swimmer:', currentSwimmer.name)
+        // Bottom reached — no debug log
       }
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Log potentially problematic key combinations
+      // Handle potentially problematic key combinations without logging
       if ((e.metaKey || e.ctrlKey) && (e.key === 'r' || e.key === 'R')) {
-        console.log('🔄 Refresh key combination detected')
+        // Ctrl/Cmd+R detected
       }
       if (e.key === 'F5') {
-        console.log('🔄 F5 refresh detected')
+        // F5 detected
       }
       if (e.key === 'Backspace' && !(e.target as HTMLElement)?.closest('input, textarea')) {
-        console.log('⬅️ Backspace key detected outside input field')
-        e.preventDefault() // Prevent browser back navigation
+        // Prevent accidental navigation with backspace
+        e.preventDefault()
       }
     }
 
@@ -73,9 +73,9 @@ function App() {
     }
   }, [currentSwimmer])
 
-  // Debug: Log when currentSwimmer changes
+  // Log when currentSwimmer changes (kept silent in production)
   useEffect(() => {
-    console.log('🏊‍♀️ Current swimmer changed:', currentSwimmer ? currentSwimmer.name : 'null')
+    // currentSwimmer updated
   }, [currentSwimmer])
 
   const bgGradient = useColorModeValue(
@@ -88,48 +88,36 @@ function App() {
     setCurrentSwimmer(null) // Clear previous swimmer data immediately
     
     try {
-      console.log('=== Starting swimmer selection for:', tiref, '===')
-      
+      // Starting swimmer selection flow (no debug logging)
+
       // Try to get complete swimmer data directly first
-      console.log('Step 1: Checking for existing data...')
       const completeResponse = await apiService.getSwimmerData(tiref)
-      console.log('Complete data response:', completeResponse)
-      
+
       if (completeResponse.success && completeResponse.data && completeResponse.data.records && completeResponse.data.records.length > 0) {
-        console.log('✅ Found existing data with', completeResponse.data.records.length, 'records')
         setCurrentSwimmer(completeResponse.data)
         return // Successfully loaded existing data
       } else {
-        console.log('❌ No existing data or empty records, need to scrape')
-        
-        // If no cached data or empty records, scrape from website
-        console.log('Step 2: Triggering scrape...')
+        // No existing data — scrape
         const scrapeResponse = await apiService.scrapeSwimmerData(tiref, true) // Force refresh
-        console.log('Scrape response:', scrapeResponse)
-        
+
         if (scrapeResponse.success) {
-          console.log('✅ Scrape successful, fetching updated data...')
-          
-          // Wait a moment for data to be processed
+          // Wait briefly for backend to process
           await new Promise(resolve => setTimeout(resolve, 1000))
-          
+
           // After scraping, get the updated data
           const updatedResponse = await apiService.getSwimmerData(tiref)
-          console.log('Updated data response:', updatedResponse)
-          
+
           if (updatedResponse.success && updatedResponse.data) {
-            console.log('✅ Successfully loaded', updatedResponse.data.records?.length || 0, 'records')
             setCurrentSwimmer(updatedResponse.data)
           } else {
             throw new Error('Failed to retrieve data after scraping')
           }
         } else {
-          console.log('❌ Scrape failed:', scrapeResponse.message)
           throw new Error(scrapeResponse.message || `Failed to scrape data for ID: ${tiref}`)
         }
       }
     } catch (error) {
-      console.error('❌ Failed to fetch swimmer data:', error)
+      console.error('Failed to fetch swimmer data:', error)
       toast({
         title: 'Unable to load swimmer data',
         description: error instanceof Error ? error.message : 'Please check the swimmer ID and try again.',
@@ -140,7 +128,7 @@ function App() {
       setCurrentSwimmer(null)
     } finally {
       setIsLoading(false)
-      console.log('=== Swimmer selection completed ===')
+      // Swimmer selection completed
     }
   }
 
@@ -152,9 +140,9 @@ function App() {
       // Force refresh by scraping new data
       const scrapeResponse = await apiService.scrapeSwimmerData(currentSwimmer.tiref, true)
       
-      if (scrapeResponse.success) {
-        console.log('Data refreshed successfully for swimmer:', currentSwimmer.tiref)
-        
+        if (scrapeResponse.success) {
+        // Data refreshed successfully for swimmer
+
         // Get updated data after refresh
         const updatedResponse = await apiService.getSwimmerData(currentSwimmer.tiref)
         if (updatedResponse.success && updatedResponse.data) {
@@ -197,31 +185,33 @@ function App() {
               <VStack align="start" spacing={2}>
                 <Heading 
                   size="2xl" 
-                  bgGradient="linear(to-r, primary.500, aqua.500)"
+                  bgGradient="linear(to-r, turquoise.500, tropical.500)"
                   bgClip="text"
                   fontWeight="extrabold"
+                  letterSpacing="-0.025em"
                 >
                   🏊‍♀️ SwimBuddy Pro
                 </Heading>
                 <Text 
                   fontSize="lg" 
-                  color={useColorModeValue('gray.600', 'gray.300')}
+                  color={useColorModeValue('seafoam.600', 'seafoam.300')}
                   fontWeight="medium"
+                  letterSpacing="-0.01em"
                 >
-                  Professional Swimming Performance Analytics
+                  🌊 Dive Deep into Your Swimming Journey! 🌟
                 </Text>
               </VStack>
               <Spacer />
               <HStack spacing={4}>
                 {currentSwimmer && (
                   <VStack align="end" spacing={1}>
-                    <Text fontSize="sm" color="gray.500">Current Swimmer</Text>
-                    <Text fontWeight="bold" color="primary.600">
-                      {currentSwimmer.name}
+                    <Text fontSize="sm" color="turquoise.500" fontWeight="500">🏊‍♀️ Swimming with</Text>
+                    <Text fontWeight="bold" color="tropical.600" letterSpacing="-0.01em">
+                      {currentSwimmer.name} 🌟
                     </Text>
                     {currentSwimmer.club && (
-                      <Text fontSize="sm" color="gray.500">
-                        {currentSwimmer.club}
+                      <Text fontSize="sm" color="seafoam.500">
+                        🏊‍♂️ {currentSwimmer.club}
                       </Text>
                     )}
                   </VStack>

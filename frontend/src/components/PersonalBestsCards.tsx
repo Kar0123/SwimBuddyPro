@@ -83,10 +83,8 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
   const [strokeFilter, setStrokeFilter] = useState('all')
   const [poolTypeFilter, setPoolTypeFilter] = useState('all')
 
-  const cardBg = useColorModeValue('white', 'gray.700')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  // Colors retained for potential future dark mode tweaks
   const textColor = useColorModeValue('gray.600', 'gray.300')
-  const accentColor = useColorModeValue('blue.500', 'blue.300')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,21 +140,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
     })
   }
 
-  const getTrendColor = (trend: string) => {
-    switch (trend) {
-      case 'improving': return 'green'
-      case 'declining': return 'red'
-      default: return 'gray'
-    }
-  }
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'improving': return '↗️'
-      case 'declining': return '↘️'
-      default: return '➡️'
-    }
-  }
+  // Trend helpers removed (not used in current UI)
 
   const formatTooltipContent = (pb: PersonalBest) => {
     return (
@@ -301,14 +285,14 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
 
   if (isLoading) {
     return (
-      <Card bg={cardBg}>
+  <Card variant="glass">
         <CardHeader>
           <VStack spacing={4} align="stretch">
             <Flex align="center" justify="center" py={4}>
               <VStack spacing={3}>
-                <SwimmingLoader type="bubbles" size="50px" color="blue.400" />
-                <Text fontSize="sm" color="gray.500">
-                  Loading personal bests...
+                <SwimmingLoader type="bubbles" size="50px" color="turquoise.400" />
+                <Text fontSize="sm" color="seafoam.600" fontWeight="500">
+                  🌊 Diving deep for your achievements...
                 </Text>
               </VStack>
             </Flex>
@@ -323,16 +307,15 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
 
   if (error) {
     return (
-      <Card bg={cardBg}>
+  <Card variant="glass">
         <CardBody>
           <VStack spacing={4}>
-            <Text color="red.500" fontSize="lg">Error loading personal bests</Text>
-            <Text color={textColor}>{error}</Text>
+            <Text color="coral.500" fontSize="lg" fontWeight="600">🐠 Oops! Something's fishy...</Text>
+            <Text color={textColor}>Don't worry, we'll get those achievements flowing again! {error}</Text>
             <Button onClick={() => {
-              console.log('🔄 Personal bests retry clicked')
+              // Retry personal bests fetch
               setError(null)
               setIsLoading(true)
-              // Retry without full page reload
               personalBestsCardsApi(tiref).then(result => {
                 setData(result)
                 setIsLoading(false)
@@ -340,7 +323,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                 setError(err instanceof Error ? err.message : 'Failed to load data')
                 setIsLoading(false)
               })
-            }}>Retry</Button>
+            }} colorScheme="turquoise">🚀 Try Again!</Button>
           </VStack>
         </CardBody>
       </Card>
@@ -352,23 +335,24 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
   }
 
   return (
-    <Card bg={cardBg} borderWidth={1} borderColor={borderColor}>
+  <Card variant="glass">
       <CardHeader>
         <VStack spacing={4} align="stretch">
           <Flex align="center">
-            <Heading size="md" color="primary.600">
-              🏆 Personal Bests Cards - {data.swimmer_name}
+            <Heading size="md" color="turquoise.600" fontWeight="700" letterSpacing="-0.02em">
+              🏆 {data.swimmer_name}'s Trophy Case! 
             </Heading>
             <Spacer />
             <HStack>
-              <Badge colorScheme="primary" variant="subtle">
-                {filteredBests.length} events
+              <Badge colorScheme="turquoise" variant="subtle">
+                🌟 {filteredBests.length} achievements
               </Badge>
               <IconButton
                 aria-label="Export data"
                 icon={<DownloadIcon />}
                 size="sm"
                 variant="outline"
+                colorScheme="turquoise"
                 onClick={exportData}
               />
             </HStack>
@@ -384,10 +368,10 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
           <HStack spacing={4} wrap="wrap">
             <InputGroup size="sm" maxW="250px">
               <InputLeftElement>
-                <SearchIcon color="gray.400" />
+                <SearchIcon color="turquoise.400" />
               </InputLeftElement>
               <Input
-                placeholder="Search events, meets..."
+                placeholder="🔍 Search your victories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -443,9 +427,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
-                  bg={cardBg}
-                  borderWidth={1}
-                  borderColor={borderColor}
+                  variant="glass"
                   borderRadius="xl"
                   overflow="hidden"
                   size="sm"
@@ -513,6 +495,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                         </Box>
                       </HStack>
                       <Badge 
+                        data-animated="entrance"
                         colorScheme={pb.primary_best.pool_type === 'LC' ? 'gray' : 'green'}
                         variant="outline" 
                         size="sm"
@@ -537,6 +520,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                         {pb.distance}m
                       </Text>
                       <Text 
+                        data-animated="entrance"
                         fontSize="2xl" 
                         fontWeight="600" 
                         color="gray.800"
@@ -554,7 +538,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                     <HStack justify="space-between" align="center" mb={2}>
                       <HStack spacing={2} flex={1}>
                         <HStack spacing={1}>
-                          <Text fontSize="lg" fontWeight="600" color={pb.stroke_color}>
+                          <Text data-animated="entrance" fontSize="lg" fontWeight="600" color={pb.stroke_color}>
                             {pb.primary_best.wa_points}
                           </Text>
                           <Text fontSize="sm" color="gray.500" fontWeight="400">

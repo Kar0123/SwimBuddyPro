@@ -3,7 +3,6 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Heading,
   Text,
   VStack,
   HStack,
@@ -12,7 +11,6 @@ import {
   Badge,
   Grid,
   GridItem,
-  Icon,
   Divider,
   Button
 } from '@chakra-ui/react'
@@ -31,7 +29,7 @@ import {
 } from 'chart.js'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import { Line } from 'react-chartjs-2'
-import { CalendarIcon } from '@chakra-ui/icons'
+
 import 'chartjs-adapter-date-fns'
 import type { SwimRecord, PersonalBest } from '../services/api'
 import { RecentPerformanceComparison } from './RecentPerformanceComparison'
@@ -52,21 +50,18 @@ ChartJS.register(
 interface EnhancedPerformanceChartProps {
   records: SwimRecord[]
   personalBests: PersonalBest[]
+  tiref: string
   onFilterChange?: (distance: string, stroke: string, poolType: string) => void
 }
 
-export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChange }: EnhancedPerformanceChartProps) => {
+export const EnhancedPerformanceChart = ({ records, personalBests, tiref, onFilterChange }: EnhancedPerformanceChartProps) => {
   const [selectedDistance, setSelectedDistance] = useState<string>('50')
   const [selectedStroke, setSelectedStroke] = useState<string>('Freestyle')
   const [selectedPoolType, setSelectedPoolType] = useState<string>('Long Course (LC)')
   
   const chartRef = useRef<any>(null)
 
-  const cardBg = useColorModeValue('white', 'gray.700')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
-  const headerBg = useColorModeValue('blue.50', 'blue.900')
-  const selectionBg = useColorModeValue('gray.50', 'gray.600')
-  const chartBg = useColorModeValue('blue.50', 'blue.900')
+
 
   // Notify parent component when filters change
   useEffect(() => {
@@ -351,40 +346,23 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
   }
 
   return (
-    <Card bg={cardBg} borderWidth={1} borderColor={borderColor} shadow="lg">
+    <Card variant="glass" shadow="lg">
       {/* Header */}
-      <CardHeader bg={headerBg} borderTopRadius="md">
-        <HStack spacing={3} align="center">
-          <Box 
-            bg="purple.500" 
-            color="white"
-            p={3} 
-            borderRadius="xl"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Icon as={CalendarIcon} boxSize={6} />
-          </Box>
-          <Heading size="lg" color="purple.600" fontWeight="600">
-            Performance Progress
-          </Heading>
-        </HStack>
-      </CardHeader>
+
 
       <CardBody p={6}>
-        <VStack spacing={6} align="stretch">
+        <VStack spacing={2} align="stretch">
           {/* Brief Info Section */}
-          <Box bg={useColorModeValue('purple.50', 'purple.900')} p={4} borderRadius="lg" borderWidth={1} borderColor="purple.200">
+          <Box bg={useColorModeValue('turquoise.50', 'turquoise.900')} p={4} borderRadius="lg" borderWidth={1} borderColor="turquoise.200">
             <VStack spacing={2} align="start">
               <HStack spacing={2}>
-                <Text fontSize="sm" color="purple.600" fontWeight="500">
-                  📊 Performance progression over time - Select specific pool type for cleaner view
+                <Text fontSize="sm" color="turquoise.600" fontWeight="500">
+                  🌊 Detailed comparison insights - Choose your stroke from the list and dive in!
                 </Text>
               </HStack>
               <HStack spacing={2}>
-                <Text fontSize="sm" color="purple.600" fontWeight="500">
-                  📈 Graph shows improvement: downward trend means getting faster!
+                <Text fontSize="sm" color="seafoam.600" fontWeight="500">
+                  📈 Swimming faster = graph goes down! 🚀 You're making waves when times improve!
                 </Text>
               </HStack>
             </VStack>
@@ -400,8 +378,8 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
                   value={selectedDistance}
                   onChange={(e) => setSelectedDistance(e.target.value)}
                   bg={useColorModeValue('white', 'gray.600')}
-                  borderColor="blue.200"
-                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px #3182CE' }}
+                  borderColor="turquoise.200"
+                  _focus={{ borderColor: 'turquoise.400', boxShadow: '0 0 0 1px #40E0D0' }}
                 >
                   {distances.map(distance => (
                     <option key={distance} value={distance}>{distance}m</option>
@@ -419,8 +397,8 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
                   value={selectedStroke}
                   onChange={(e) => setSelectedStroke(e.target.value)}
                   bg={useColorModeValue('white', 'gray.600')}
-                  borderColor="blue.200"
-                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px #3182CE' }}
+                  borderColor="turquoise.200"
+                  _focus={{ borderColor: 'turquoise.400', boxShadow: '0 0 0 1px #40E0D0' }}
                 >
                   {strokes.map(stroke => (
                     <option key={stroke} value={stroke}>{stroke}</option>
@@ -438,8 +416,8 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
                   value={selectedPoolType}
                   onChange={(e) => setSelectedPoolType(e.target.value)}
                   bg={useColorModeValue('white', 'gray.600')}
-                  borderColor="blue.200"
-                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px #3182CE' }}
+                  borderColor="turquoise.200"
+                  _focus={{ borderColor: 'turquoise.400', boxShadow: '0 0 0 1px #40E0D0' }}
                 >
                   {poolTypes.map(poolType => (
                     <option key={poolType} value={poolType}>{poolType}</option>
@@ -450,20 +428,20 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
           </Grid>
 
           {/* Current Selection Summary */}
-          <Card bg={selectionBg} borderWidth={1} borderColor="blue.200">
+          <Card variant="glass">
             <CardBody py={4}>
               <VStack spacing={3} align="stretch">
                 <Text fontSize="md" fontWeight="bold" color="gray.700">
                   📊 Current Selection
                 </Text>
                 <HStack spacing={6}>
-                  <Badge colorScheme="blue" variant="solid" px={3} py={1}>
+                  <Badge colorScheme="turquoise" variant="solid" px={3} py={1}>
                     DISTANCE {selectedDistance}m
                   </Badge>
-                  <Badge colorScheme="purple" variant="solid" px={3} py={1}>
+                  <Badge colorScheme="seafoam" variant="solid" px={3} py={1}>
                     STROKE {selectedStroke}
                   </Badge>
-                  <Badge colorScheme="green" variant="solid" px={3} py={1}>
+                  <Badge colorScheme="tropical" variant="solid" px={3} py={1}>
                     POOL {selectedPoolType === 'Long Course (LC)' ? 'LC' : 'SC'}
                   </Badge>
                 </HStack>
@@ -482,32 +460,39 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
           <Divider />
 
           {/* Chart Section */}
-          <Card bg={chartBg} borderWidth={1} borderColor="blue.200">
+          <Card variant="glass">
             <CardHeader>
-              <VStack spacing={3} align="center">
-                <Text fontSize="lg" fontWeight="bold" color="blue.700">
-                  📈 {filteredRecords.length} records for {selectedDistance}m {selectedStroke} ({selectedPoolType === 'Long Course (LC)' ? 'Long Course' : 'Short Course'})
+              <VStack spacing={2} align="center">
+                <Text fontSize="lg" fontWeight="bold" color="turquoise.700" letterSpacing="-0.01em">
+                  🌊 {filteredRecords.length} splash records for {selectedDistance}m {selectedStroke} ({selectedPoolType === 'Long Course (LC)' ? 'Long Course' : 'Short Course'})
                 </Text>
-                <Text fontSize="sm" color="blue.600">
-                  Time range: {getTimeRange()}
+                <Text fontSize="sm" color="turquoise.600" fontFamily="aquatic">
+                  🕐 Time range: {getTimeRange()}
                 </Text>
-                <HStack spacing={4} align="center">
-                  <Text fontSize="xs" color="blue.500" fontWeight="medium">
+                <HStack spacing={2} align="center">
+                  <Text fontSize="xs" color="turquoise.500" fontWeight="medium">
                     🖱️ Scroll to zoom | Drag to pan | Double-click to reset
                   </Text>
                   <Button
-                    size="xs"
-                    colorScheme="blue"
+                    size="sm"
                     variant="outline"
+                    colorScheme="turquoise"
                     onClick={resetZoom}
                     fontSize="xs"
+                    borderWidth="2px"
+                    _hover={{
+                      bg: 'turquoise.50',
+                      borderColor: 'turquoise.500',
+                      transform: 'scale(1.05)'
+                    }}
+                    leftIcon={<Text fontSize="xs">🔄</Text>}
                   >
                     Reset Zoom
                   </Button>
                 </HStack>
               </VStack>
             </CardHeader>
-            <CardBody>
+            <CardBody pt={2}>
               <Box h="500px" bg={useColorModeValue('white', 'gray.800')} borderRadius="md" p={4}>
                 {filteredRecords.length > 0 ? (
                   <Line ref={chartRef} data={chartData} options={chartOptions} />
@@ -531,18 +516,18 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
           {/* Integrated Performance Comparison */}
           <Box mt={8}>
             <Card 
-              bg={useColorModeValue('green.50', 'green.900')} 
+              bg={useColorModeValue('turquoise.50', 'turquoise.900')} 
               borderWidth={2} 
-              borderColor="green.200" 
+              borderColor="turquoise.200" 
               shadow="lg"
               borderRadius="xl"
               overflow="hidden"
             >
-              <CardHeader pb={4} bg={useColorModeValue('green.100', 'green.800')}>
+              <CardHeader pb={4} bg={useColorModeValue('blue.100', 'blue.800')}>
                 <VStack spacing={3}>
                   <HStack spacing={4} align="center" justify="center">
                     <Box 
-                      bg="green.500" 
+                      bg="blue.500" 
                       color="white"
                       p={3} 
                       borderRadius="xl"
@@ -551,14 +536,14 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
                       justifyContent="center"
                       shadow="md"
                     >
-                      <Text fontSize="xl" fontWeight="bold">📈</Text>
+                      <Text fontSize="xl" fontWeight="bold">⚡</Text>
                     </Box>
                     <VStack spacing={1} align="center">
-                      <Text fontSize="xl" fontWeight="bold" color="green.800" letterSpacing="tight">
-                        Performance Analytics
+                      <Text fontSize="xl" fontWeight="bold" color="purple.800" letterSpacing="tight">
+                        Recent Race Analysis
                       </Text>
-                      <Text fontSize="sm" color="green.600" fontWeight="medium">
-                        Detailed comparison insights
+                      <Text fontSize="sm" color="purple.600" fontWeight="medium">
+                        Latest performance insights & comparisons based on your selected stroke
                       </Text>
                     </VStack>
                   </HStack>
@@ -579,6 +564,7 @@ export const EnhancedPerformanceChart = ({ records, personalBests, onFilterChang
                     <RecentPerformanceComparison
                       records={records}
                       personalBests={personalBests}
+                      tiref={tiref}
                       selectedDistance={selectedDistance}
                       selectedStroke={selectedStroke}
                       selectedPoolType={selectedPoolType}

@@ -124,9 +124,7 @@ export const SwimmerInput = ({
       return
     }
 
-    console.log('=== FORM SUBMISSION ===')
-    console.log('Submitting swimmer ID:', tiref)
-    console.log('Current swimmer before submission:', currentSwimmer?.tiref)
+  // Form submission initiated
     
     try {
       await onSwimmerSelect(tiref)
@@ -141,8 +139,8 @@ export const SwimmerInput = ({
     } catch (error) {
       console.error('Failed to load swimmer:', error)
       toast({
-        title: 'Failed to Load Swimmer',
-        description: error instanceof Error ? error.message : 'Please check the membership ID and try again',
+        title: '🌊 Oops! Rough Waters Ahead',
+        description: error instanceof Error ? error.message : 'No worries! Check that swimmer ID and let\'s try another stroke! 🏊‍♀️',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -154,16 +152,16 @@ export const SwimmerInput = ({
     try {
       await onRefreshData()
       toast({
-        title: 'Data Refreshed',
-        description: 'Swimming data has been updated',
+        title: '🚀 Fresh Data Splash!',
+        description: 'Your swimming data is now crystal clear and updated! 🌟',
         status: 'success',
         duration: 3000,
         isClosable: true,
       })
     } catch (error) {
       toast({
-        title: 'Refresh Failed',
-        description: 'Unable to refresh data. Please try again.',
+        title: '🐠 Something\'s Fishy...',
+        description: 'Couldn\'t refresh the data. Let\'s try that again - third time\'s the charm! 🌊',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -172,17 +170,17 @@ export const SwimmerInput = ({
   }
 
   return (
-    <Card>
+    <Card variant="glass">
       <CardBody>
         <VStack spacing={6} align="stretch">
           {/* Header */}
           <Flex justify="space-between" align="center">
             <VStack align="start" spacing={1}>
-              <Text fontSize="lg" fontWeight="bold" color="primary.600">
-                Swimmer Lookup
+              <Text fontSize="lg" fontWeight="bold" color="turquoise.600" letterSpacing="-0.01em">
+                🏊‍♀️ Dive into Swimmer Data! 
               </Text>
-              <Text fontSize="sm" color="gray.600">
-                Enter a membership ID to fetch swimming data
+              <Text fontSize="sm" color="seafoam.600">
+                Ready to make a splash? Enter your swimmer ID and let's dive in! 🌊
               </Text>
             </VStack>
             
@@ -205,25 +203,25 @@ export const SwimmerInput = ({
           <form onSubmit={handleSubmit}>
             <VStack spacing={4} align="stretch">
               <FormControl isInvalid={!!validationError && !!tiref} isRequired>
-                <FormLabel>Membership ID (Tiref)</FormLabel>
+                <FormLabel color="tropical.600" fontWeight="600">🏊‍♂️ Swimmer ID (Let's find your champion!)</FormLabel>
                 <InputGroup>
                   <InputLeftElement>
                     {isValidating ? (
-                      <Spinner size="sm" color="primary.500" />
+                      <Spinner size="sm" color="turquoise.500" />
                     ) : (
-                      <SearchIcon color="gray.400" />
+                      <SearchIcon color="seafoam.400" />
                     )}
                   </InputLeftElement>
                   <Input
                     value={tiref}
                     onChange={(e) => setTiref(e.target.value)}
-                    placeholder="e.g., 1507205"
+                    placeholder="e.g., 1507205 - Dive in with your ID! 🌊"
                     variant="swimming"
                     bg="white"
-                    _placeholder={{ color: 'gray.500' }}
+                    _placeholder={{ color: 'seafoam.500' }}
                   />
                 </InputGroup>
-                <FormErrorMessage>{validationError}</FormErrorMessage>
+                <FormErrorMessage color="coral.500">🐠 {validationError}</FormErrorMessage>
               </FormControl>
 
               <HStack spacing={4}>
@@ -232,12 +230,34 @@ export const SwimmerInput = ({
                   variant="swimming"
                   size="lg"
                   isLoading={isLoading}
-                  loadingText="Loading swimmer data..."
+                  loadingText="🌊 Diving into the data..."
                   isDisabled={!tiref || !/^\d{4,8}$/.test(tiref)}
                   flex={1}
                   leftIcon={<SearchIcon />}
+                  fontFamily="'Inter', 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+                  fontSize="md"
+                  fontWeight="600"
+                  letterSpacing="0.025em"
+                  textTransform="none"
+                  color="blue.600"
+                  textShadow="0 1px 2px rgba(0, 0, 0, 0.1)"
+                  _hover={{
+                    color: "blue.700",
+                    textShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+                    transform: "translateY(-0.5px)"
+                  }}
+                  _active={{
+                    color: "blue.800",
+                    textShadow: "0 1px 1px rgba(0, 0, 0, 0.2)",
+                    transform: "translateY(0px)"
+                  }}
+                  _disabled={{
+                    color: "gray.400",
+                    textShadow: "none"
+                  }}
+                  transition="all 0.15s ease"
                 >
-                  {currentSwimmer ? 'Switch Swimmer' : 'Load Swimmer'}
+                  {currentSwimmer ? '🏊‍♀️ Switch Swimmer' : '🚀 Dive In!'}
                 </Button>
                 
                 {isValid && !isValidating && (
@@ -247,7 +267,7 @@ export const SwimmerInput = ({
                     transition={{ duration: 0.3 }}
                   >
                     <Badge colorScheme="green" p={2} borderRadius="md">
-                      ✓ Valid ID
+                      🌟 Ready to make waves!
                     </Badge>
                   </MotionBox>
                 )}
@@ -264,22 +284,22 @@ export const SwimmerInput = ({
             >
               <Box
                 p={4}
-                bg="primary.50"
+                bg="turquoise.50"
                 borderRadius="lg"
                 border="1px"
-                borderColor="primary.200"
+                borderColor="turquoise.200"
               >
                 <HStack justify="space-between">
                   <VStack align="start" spacing={1}>
-                    <Text fontSize="sm" color="primary.600" fontWeight="medium">
-                      Currently Viewing
+                    <Text fontSize="sm" color="turquoise.600" fontWeight="medium">
+                      🏊‍♀️ Swimming with Champion
                     </Text>
-                    <Text fontWeight="bold" color="primary.700">
-                      {currentSwimmer.name}
+                    <Text fontWeight="bold" color="tropical.700" letterSpacing="-0.01em">
+                      {currentSwimmer.name} 🌟
                     </Text>
                     {currentSwimmer.club && (
-                      <Text fontSize="sm" color="gray.600">
-                        {currentSwimmer.club}
+                      <Text fontSize="sm" color="seafoam.600">
+                        🏊‍♂️ {currentSwimmer.club}
                       </Text>
                     )}
                   </VStack>

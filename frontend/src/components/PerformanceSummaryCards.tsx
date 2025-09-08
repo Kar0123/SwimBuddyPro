@@ -18,9 +18,6 @@ interface PerformanceSummaryCardsProps {
 }
 
 const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ records }) => {
-  const textColor = useColorModeValue('gray.700', 'gray.200')
-  const cardBg = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   // Calculate statistics from real data
   const totalSwims = records.length
@@ -43,39 +40,39 @@ const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ recor
       subtitle: 'Races completed across all events',
       value: totalSwims.toString(),
       icon: TimeIcon,
-      bgColor: 'blue.50',
-      iconBg: 'blue.100',
-      iconColor: 'blue.500',
-      numberColor: 'blue.600',
+      bgColor: 'turquoise.50',
+      iconBg: 'turquoise.100',
+      iconColor: 'turquoise.500',
+      numberColor: 'turquoise.600',
     },
     {
       title: 'Different Strokes',
       subtitle: 'Swimming styles mastered',
       value: differentStrokes.toString(),
       icon: SearchIcon,
-      bgColor: 'purple.50',
-      iconBg: 'purple.100',
-      iconColor: 'purple.500',
-      numberColor: 'purple.600',
+      bgColor: 'seafoam.50',
+      iconBg: 'seafoam.100',
+      iconColor: 'seafoam.500',
+      numberColor: 'seafoam.600',
     },
     {
       title: 'Personal Bests',
       subtitle: `Best in ${bestStroke}`,
       value: bestWAPoints.toString(),
       icon: StarIcon,
-      bgColor: 'green.50',
-      iconBg: 'green.100',
-      iconColor: 'green.500',
-      numberColor: 'green.600',
+      bgColor: 'coral.50',
+      iconBg: 'coral.100',
+      iconColor: 'coral.500',
+      numberColor: 'coral.600',
     },
   ]
 
   // Bottom stats
   const bottomStats = [
-    { label: 'Best WA Points', value: bestWAPoints, color: 'green.500' },
-    { label: 'Distances', value: distances, color: 'orange.500' },
-    { label: 'Venues', value: venues, color: 'pink.500' },
-    { label: 'Meets', value: meets, color: 'cyan.500' },
+    { label: 'Best WA Points', value: bestWAPoints, color: 'turquoise.500' },
+    { label: 'Distances', value: distances, color: 'tropical.500' },
+    { label: 'Venues', value: venues, color: 'coral.500' },
+    { label: 'Meets', value: meets, color: 'seafoam.500' },
   ]
 
   return (
@@ -83,15 +80,17 @@ const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ recor
       {/* Header */}
       <HStack mb={6} spacing={4} align="center">
         <Box
-          bg="blue.500"
+          bg="turquoise.500"
           color="white"
           px={4}
           py={2}
-          borderRadius="md"
+          borderRadius="xl"
           fontWeight="bold"
           fontSize="lg"
+          letterSpacing="-0.02em"
+          shadow="md"
         >
-          📊 Performance Summary
+          🌊 Performance Summary
         </Box>
       </HStack>
 
@@ -106,36 +105,73 @@ const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ recor
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Box
-                bg={card.bgColor}
                 borderRadius="2xl"
-                border="1px solid"
-                borderColor={borderColor}
+                border="2px solid"
+                borderColor={useColorModeValue('white', 'whiteAlpha.300')}
+                backdropFilter="blur(15px)"
+                bgGradient={useColorModeValue(
+                  `linear(135deg, ${card.bgColor}, whiteAlpha.900, ${card.iconBg})`,
+                  `linear(135deg, ${card.iconColor}Alpha.200, blackAlpha.400, ${card.bgColor})`
+                )}
                 p={8}
                 textAlign="center"
-                shadow="sm"
+                shadow="xl"
+                position="relative"
+                overflow="hidden"
+                _before={{
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  bgGradient: `linear(45deg, ${card.iconColor}Alpha.100, transparent, ${card.iconColor}Alpha.050)`,
+                  opacity: 0.8,
+                  zIndex: 0,
+                }}
                 _hover={{
-                  shadow: 'md',
-                  transform: 'translateY(-2px)',
-                  transition: 'all 0.2s ease-in-out',
+                  shadow: '2xl',
+                  transform: 'translateY(-6px) scale(1.03)',
+                  borderColor: card.iconColor,
+                  bgGradient: useColorModeValue(
+                    `linear(135deg, ${card.iconColor}Alpha.200, ${card.bgColor}, whiteAlpha.800)`,
+                    `linear(135deg, ${card.iconColor}Alpha.300, blackAlpha.300, ${card.bgColor})`
+                  ),
+                  transition: 'all 0.4s ease-in-out',
                 }}
               >
                 {/* Icon in Circle */}
                 <Circle
                   size="80px"
-                  bg={card.iconBg}
+                  bgGradient={`linear(135deg, ${card.iconBg}, ${card.iconColor})`}
                   mx="auto"
                   mb={6}
+                  shadow="lg"
+                  border="3px solid"
+                  borderColor="white"
+                  position="relative"
+                  zIndex={1}
+                  _hover={{
+                    shadow: `0 0 30px ${card.iconColor}`,
+                    transform: 'scale(1.1) rotate(5deg)',
+                    transition: 'all 0.3s ease-in-out',
+                  }}
                 >
-                  <Icon as={card.icon} boxSize={10} color={card.iconColor} />
+                  <Icon as={card.icon} boxSize={10} color="white" />
                 </Circle>
 
                 {/* Large Number */}
                 <Text
                   fontSize="5xl"
                   fontWeight="bold"
-                  color={card.numberColor}
+                  bgGradient={`linear(45deg, ${card.numberColor}, ${card.iconColor})`}
+                  bgClip="text"
                   lineHeight="1"
                   mb={2}
+                  letterSpacing="-0.03em"
+                  position="relative"
+                  zIndex={1}
+                  textShadow="0 2px 10px rgba(0,0,0,0.1)"
                 >
                   {card.value}
                 </Text>
@@ -144,8 +180,11 @@ const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ recor
                 <Text
                   fontSize="xl"
                   fontWeight="semibold"
-                  color={textColor}
+                  color={useColorModeValue('gray.800', 'white')}
                   mb={2}
+                  letterSpacing="-0.02em"
+                  position="relative"
+                  zIndex={1}
                 >
                   {card.title}
                 </Text>
@@ -153,8 +192,11 @@ const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ recor
                 {/* Subtitle */}
                 <Text
                   fontSize="sm"
-                  color="gray.500"
+                  color={useColorModeValue('gray.600', 'gray.300')}
                   lineHeight="1.4"
+                  fontFamily="aquatic"
+                  position="relative"
+                  zIndex={1}
                 >
                   {card.subtitle}
                 </Text>
@@ -173,32 +215,62 @@ const PerformanceSummaryCards: React.FC<PerformanceSummaryCardsProps> = ({ recor
               transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
             >
               <Box
-                bg={cardBg}
-                borderRadius="lg"
-                border="1px solid"
-                borderColor={borderColor}
+                borderRadius="xl"
+                border="2px solid"
+                borderColor={useColorModeValue('white', 'whiteAlpha.300')}
+                backdropFilter="blur(10px)"
+                bgGradient={useColorModeValue(
+                  `linear(135deg, whiteAlpha.800, ${stat.color}Alpha.100)`,
+                  `linear(135deg, blackAlpha.300, ${stat.color}Alpha.200)`
+                )}
                 p={4}
                 textAlign="center"
-                shadow="sm"
+                shadow="lg"
+                position="relative"
+                overflow="hidden"
+                _before={{
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  bgGradient: `radial(circle at 30% 30%, ${stat.color}Alpha.150, transparent)`,
+                  opacity: 0.6,
+                  zIndex: 0,
+                }}
                 _hover={{
-                  shadow: 'md',
+                  shadow: `0 8px 25px ${stat.color}Alpha.300`,
                   borderColor: stat.color,
-                  transition: 'all 0.2s ease-in-out',
+                  transform: 'translateY(-3px) scale(1.05)',
+                  bgGradient: useColorModeValue(
+                    `linear(135deg, ${stat.color}Alpha.200, whiteAlpha.900)`,
+                    `linear(135deg, ${stat.color}Alpha.300, blackAlpha.200)`
+                  ),
+                  transition: 'all 0.3s ease-in-out',
                 }}
               >
                 <Text
                   fontSize="2xl"
                   fontWeight="bold"
-                  color={stat.color}
+                  bgGradient={`linear(45deg, ${stat.color}, ${stat.color})`}
+                  bgClip="text"
                   lineHeight="1"
                   mb={1}
+                  letterSpacing="-0.03em"
+                  position="relative"
+                  zIndex={1}
+                  textShadow="0 2px 8px rgba(0,0,0,0.1)"
                 >
                   {stat.value}
                 </Text>
                 <Text
                   fontSize="sm"
-                  color="gray.500"
+                  color={useColorModeValue('gray.600', 'gray.300')}
                   fontWeight="medium"
+                  fontFamily="aquatic"
+                  position="relative"
+                  zIndex={1}
                 >
                   {stat.label}
                 </Text>

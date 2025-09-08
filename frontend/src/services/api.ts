@@ -78,7 +78,7 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${API_BASE_URL}${endpoint}`
-    console.log(`Making API request to: ${url}`)
+  // Making API request to: ${url}
     
     try {
       const response = await fetch(url, {
@@ -89,14 +89,14 @@ class ApiService {
         ...options,
       })
 
-      console.log(`Response status: ${response.status} ${response.statusText}`)
+  // Response status available
 
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
-      console.log('Response data:', data)
+  // Response data parsed
       
       return {
         data,
@@ -121,7 +121,7 @@ class ApiService {
       ? `/api/scraper/refresh/${tiref}`
       : `/api/scraper/scrape/${tiref}`
     
-    console.log(`Scraping swimmer data: ${endpoint} (forceRefresh: ${forceRefresh})`)
+  // Scraping swimmer data: ${endpoint} (forceRefresh: ${forceRefresh})
     
     return this.request<any>(endpoint, {
       method: 'POST',

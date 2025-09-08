@@ -99,7 +99,7 @@ class PersonalBest(BaseModel):
     best_time: str
     best_time_seconds: float
     wa_points: Optional[int]
-    meet_date: datetime
+    meet_date: Optional[datetime]  # Allow None for invalid dates
     venue: str
     meet_name: str
     improvement_from_previous: Optional[float] = Field(None, description="Seconds improved from previous PB")

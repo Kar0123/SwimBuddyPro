@@ -192,7 +192,7 @@ def format_personal_best_for_frontend(pb):
         "bestTime": pb.best_time,
         "bestTimeSeconds": pb.best_time_seconds or 0,
         "waPoints": pb.wa_points or 0,
-        "date": pb.best_date.isoformat() if hasattr(pb, 'best_date') and pb.best_date else None,
+        "date": pb.meet_date.isoformat() if hasattr(pb, 'meet_date') and pb.meet_date else None,
         "meet": getattr(pb, 'meet_name', "Unknown Meet"),
         "venue": getattr(pb, 'venue', "Unknown Venue"),
         "improvementHistory": []  # Would need additional data structure
