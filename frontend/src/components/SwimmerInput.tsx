@@ -4,6 +4,7 @@ import {
   CardBody,
   HStack,
   VStack,
+  Stack,
   Input,
   Button,
   Text,
@@ -172,14 +173,29 @@ export const SwimmerInput = ({
   return (
     <Card variant="glass">
       <CardBody>
-        <VStack spacing={6} align="stretch">
+        <VStack spacing={{ base: 4, md: 6 }} align="stretch">
           {/* Header */}
-          <Flex justify="space-between" align="center">
-            <VStack align="start" spacing={1}>
-              <Text fontSize="lg" fontWeight="bold" color="turquoise.600" letterSpacing="-0.01em">
+          <Flex 
+            justify="space-between" 
+            align="center" 
+            direction={{ base: "column", sm: "row" }}
+            gap={{ base: 3, sm: 0 }}
+          >
+            <VStack align={{ base: "center", sm: "start" }} spacing={1}>
+              <Text 
+                fontSize={{ base: "md", sm: "lg" }} 
+                fontWeight="bold" 
+                color="turquoise.600" 
+                letterSpacing="-0.01em"
+                textAlign={{ base: "center", sm: "left" }}
+              >
                 🏊‍♀️ Dive into Swimmer Data! 
               </Text>
-              <Text fontSize="sm" color="seafoam.600">
+              <Text 
+                fontSize={{ base: "xs", sm: "sm" }} 
+                color="seafoam.600"
+                textAlign={{ base: "center", sm: "left" }}
+              >
                 Ready to make a splash? Enter your swimmer ID and let's dive in! 🌊
               </Text>
             </VStack>
@@ -193,7 +209,9 @@ export const SwimmerInput = ({
                   colorScheme="primary"
                   onClick={handleRefresh}
                   isDisabled={isLoading}
-                  size="sm"
+                  size={{ base: "md", sm: "sm" }}
+                  minH="44px"
+                  minW="44px"
                 />
               </Tooltip>
             )}
@@ -201,10 +219,16 @@ export const SwimmerInput = ({
 
           {/* Input Form */}
           <form onSubmit={handleSubmit}>
-            <VStack spacing={4} align="stretch">
+            <VStack spacing={{ base: 3, md: 4 }} align="stretch">
               <FormControl isInvalid={!!validationError && !!tiref} isRequired>
-                <FormLabel color="tropical.600" fontWeight="600">🏊‍♂️ Swimmer ID (Let's find your champion!)</FormLabel>
-                <InputGroup>
+                <FormLabel 
+                  color="tropical.600" 
+                  fontWeight="600"
+                  fontSize={{ base: "sm", md: "md" }}
+                >
+                  🏊‍♂️ Swimmer ID (Let's find your champion!)
+                </FormLabel>
+                <InputGroup size={{ base: "md", md: "lg" }}>
                   <InputLeftElement>
                     {isValidating ? (
                       <Spinner size="sm" color="turquoise.500" />
@@ -219,28 +243,37 @@ export const SwimmerInput = ({
                     variant="swimming"
                     bg="white"
                     _placeholder={{ color: 'seafoam.500' }}
+                    fontSize={{ base: "sm", md: "md" }}
+                    minH="44px"
                   />
                 </InputGroup>
-                <FormErrorMessage color="coral.500">🐠 {validationError}</FormErrorMessage>
+                <FormErrorMessage color="coral.500" fontSize={{ base: "xs", md: "sm" }}>
+                  🐠 {validationError}
+                </FormErrorMessage>
               </FormControl>
 
-              <HStack spacing={4}>
+              <Stack 
+                direction={{ base: "column", sm: "row" }} 
+                spacing={{ base: 3, sm: 4 }}
+              >
                 <Button
                   type="submit"
                   variant="swimming"
-                  size="lg"
+                  size={{ base: "md", md: "lg" }}
                   isLoading={isLoading}
                   loadingText="🌊 Diving into the data..."
                   isDisabled={!tiref || !/^\d{4,8}$/.test(tiref)}
                   flex={1}
                   leftIcon={<SearchIcon />}
                   fontFamily="'Inter', 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif"
-                  fontSize="md"
+                  fontSize={{ base: "sm", md: "md" }}
                   fontWeight="600"
                   letterSpacing="0.025em"
                   textTransform="none"
                   color="blue.600"
                   textShadow="0 1px 2px rgba(0, 0, 0, 0.1)"
+                  minH="44px"
+                  w={{ base: "100%", sm: "auto" }}
                   _hover={{
                     color: "blue.700",
                     textShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
@@ -271,7 +304,7 @@ export const SwimmerInput = ({
                     </Badge>
                   </MotionBox>
                 )}
-              </HStack>
+              </Stack>
             </VStack>
           </form>
 

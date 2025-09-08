@@ -173,8 +173,8 @@ function App() {
       <CustomTitleBar />
       
       {/* Main Content */}
-      <Container maxW="container.xl" py={6}>
-        <VStack spacing={8} align="stretch">
+      <Container maxW={{ base: "container.sm", md: "container.md", lg: "container.xl" }} py={{ base: 4, md: 6 }} px={{ base: 4, md: 6 }}>
+        <VStack spacing={{ base: 6, md: 8 }} align="stretch">
           {/* Header */}
           <MotionBox
             initial={{ opacity: 0, y: -20 }}
