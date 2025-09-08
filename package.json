@@ -1,0 +1,13 @@
+{
+  "name": "swimbuddy-pro",
+  "version": "1.2.0",
+  "description": "SwimBuddy Pro - Swimming Performance Analytics",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt",
+    "start": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+  },
+  "engines": {
+    "node": "18.x",
+    "python": "3.9.x"
+  }
+}

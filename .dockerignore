@@ -1,0 +1,13 @@
+node_modules
+*/node_modules
+.git
+.gitignore
+README.md
+backend/venv
+backend/__pycache__
+backend/*.pyc
+frontend/dist
+frontend/.vite
+.env
+.env.local
+*.log
