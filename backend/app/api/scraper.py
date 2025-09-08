@@ -57,21 +57,39 @@ async def scrape_swimmer_data(tiref: str, force_refresh: bool = False):
                 detail="Invalid tiref format. Must be 4-8 digits."
             )
         
-        # Check if we should use cached data
+        # Check if we should use cached data (improved caching logic)
         if not force_refresh:
             cache_info = db.get_cache_metadata(tiref)
             swimmer = db.get_swimmer(tiref)
             
             if cache_info and swimmer and cache_info['scrape_success']:
-                # Return cached data info
-                records_count = cache_info['records_count']
+                # Check if cache is fresh (less than 24 hours old)
+                cache_age_hours = (datetime.now() - cache_info['last_scraped']).total_seconds() / 3600
+                
+                # Use cache if it's less than 24 hours old, or immediately return for very recent cache
+                if cache_age_hours < 24:
+                    records_count = cache_info['records_count']
+                    return ScrapeResponse(
+                        success=True,
+                        message=f"Loaded {records_count} records from cache ({cache_age_hours:.1f}h old)",
+                        tiref=tiref,
+                        records_found=records_count,
+                        swimmer_info=swimmer,
+                        last_updated=cache_info['last_scraped'],
+                        from_cache=True
+                    )
+                else:
+                    logger.info(f"Cache for {tiref} is {cache_age_hours:.1f}h old, refreshing...")
+            elif swimmer and not force_refresh:
+                # Even if no cache metadata, if we have swimmer data, return it quickly
+                records = db.get_swim_records(tiref)
                 return ScrapeResponse(
                     success=True,
-                    message=f"Loaded {records_count} records from cache",
+                    message=f"Loaded {len(records)} records from database",
                     tiref=tiref,
-                    records_found=records_count,
+                    records_found=len(records),
                     swimmer_info=swimmer,
-                    last_updated=cache_info['last_scraped'],
+                    last_updated=swimmer.last_updated,
                     from_cache=True
                 )
         

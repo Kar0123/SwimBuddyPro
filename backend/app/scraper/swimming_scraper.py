@@ -8,6 +8,7 @@ from typing import List, Optional, Dict, Any, Tuple
 from fake_useragent import UserAgent
 from tenacity import retry, stop_after_attempt, wait_exponential
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.models.schemas import SwimmerInfo, SwimRecord, StrokeType, PoolType, RoundType
 
@@ -24,7 +25,7 @@ class SwimmingResultsScraper:
         self.session = requests.Session()
         self.ua = UserAgent()
         self.last_request_time = 0
-        self.min_delay = 2.0  # Minimum 2 seconds between requests
+        self.min_delay = 0.8  # Reduced to 0.8 seconds between requests for better UX
         
         # Set default headers
         self.session.headers.update({
@@ -85,39 +86,52 @@ class SwimmingResultsScraper:
             raise
     
     def validate_tiref(self, tiref: str) -> bool:
-        """Validate if a tiref exists by checking the personal best page"""
+        """Validate if a tiref exists with faster method"""
         try:
-            response = self._make_request(self.PERSONAL_BEST_URL, {'mode': 'A', 'tiref': tiref})
-            if response and response.status_code == 200:
-                soup = BeautifulSoup(response.content, 'html.parser')
-                
-                # Check for error messages or empty results
-                error_indicators = [
-                    "no results found",
-                    "invalid",
-                    "not found",
-                    "error"
-                ]
-                
-                page_text = soup.get_text().lower()
-                for indicator in error_indicators:
-                    if indicator in page_text:
-                        return False
-                
-                # Check if there's actual data (tables, swimmer info, etc.)
-                tables = soup.find_all('table')
-                if tables:
-                    return True
-                
-                # Check for swimmer name or other indicators
-                if soup.find('h1') or soup.find('h2'):
-                    return True
+            # First try a quick HEAD request to check if URL responds
+            response = self.session.head(
+                self.PERSONAL_BEST_URL, 
+                params={'mode': 'A', 'tiref': tiref},
+                timeout=5,
+                headers={'User-Agent': self._get_random_user_agent()}
+            )
             
-            return False
+            # If HEAD request fails, fall back to minimal GET request
+            if response.status_code not in [200, 302]:
+                response = self._make_request(self.PERSONAL_BEST_URL, {'mode': 'A', 'tiref': tiref})
+                if not response or response.status_code != 200:
+                    return False
+                
+                # Quick validation - just check if page contains swimmer data patterns
+                content_preview = response.text[:2000]  # Only check first 2KB for speed
+                
+                # Fast checks for valid swimmer page
+                if any(indicator in content_preview.lower() for indicator in [
+                    "no results found", "invalid", "not found", "error occurred"
+                ]):
+                    return False
+                
+                # Look for positive indicators
+                if any(pattern in content_preview for pattern in [
+                    "<table", "stroke", "time", "best", f"({tiref})"
+                ]):
+                    return True
+                
+                return False
+            
+            return True  # HEAD request succeeded, likely valid
             
         except Exception as e:
-            logger.error(f"Error validating tiref {tiref}: {e}")
-            return False
+            logger.warning(f"Fast validation failed for {tiref}, trying fallback: {e}")
+            # Fallback to original method if fast method fails
+            try:
+                response = self._make_request(self.PERSONAL_BEST_URL, {'mode': 'A', 'tiref': tiref})
+                if response and response.status_code == 200:
+                    return "<table" in response.text[:1000]  # Quick table check
+                return False
+            except Exception as e2:
+                logger.error(f"Error validating tiref {tiref}: {e2}")
+                return False
     
     def scrape_swimmer_info(self, tiref: str) -> Optional[SwimmerInfo]:
         """Scrape swimmer biographical information from personal best page"""
@@ -226,7 +240,7 @@ class SwimmingResultsScraper:
             return None
     
     def scrape_swim_records(self, tiref: str) -> List[SwimRecord]:
-        """Scrape swimming records from personal best page - ENHANCED for complete race history"""
+        """Scrape swimming records from personal best page - OPTIMIZED with concurrent processing"""
         try:
             # First, get personal bests to identify all events the swimmer has competed in
             personal_best_records = self._scrape_personal_bests(tiref)
@@ -234,21 +248,40 @@ class SwimmingResultsScraper:
             # Extract unique events from personal bests
             events_competed = self._extract_events_from_records(personal_best_records)
             
-            # For each event, get complete race history
+            # If no events found or only a few, stick to personal bests for speed
+            if len(events_competed) <= 2:
+                logger.info(f"Limited events for {tiref}, using personal bests only for speed")
+                return personal_best_records
+            
+            # Use concurrent processing for multiple events
             all_race_records = []
-            for event_info in events_competed:
-                event_records = self._scrape_event_race_history(tiref, event_info)
-                all_race_records.extend(event_records)
+            max_workers = min(3, len(events_competed))  # Limit concurrent requests
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                # Submit all event scraping tasks
+                future_to_event = {
+                    executor.submit(self._scrape_event_race_history, tiref, event_info): event_info
+                    for event_info in events_competed
+                }
+                
+                # Collect results as they complete
+                for future in as_completed(future_to_event):
+                    try:
+                        event_records = future.result()
+                        all_race_records.extend(event_records)
+                    except Exception as exc:
+                        event_info = future_to_event[future]
+                        logger.warning(f"Event {event_info['event_name']} scraping failed: {exc}")
             
             # Remove duplicates and sort by date (newest first)
             unique_records = self._deduplicate_records(all_race_records)
             unique_records.sort(key=lambda x: x.meet_date, reverse=True)
             
-            logger.info(f"Enhanced scrape for {tiref}: {len(unique_records)} total race records found (was {len(personal_best_records)} personal bests)")
-            return unique_records
+            logger.info(f"Concurrent scrape for {tiref}: {len(unique_records)} total race records found (was {len(personal_best_records)} personal bests)")
+            return unique_records if unique_records else personal_best_records
             
         except Exception as e:
-            logger.error(f"Error in enhanced scraping for {tiref}: {e}")
+            logger.error(f"Error in concurrent scraping for {tiref}: {e}")
             # Fallback to original personal best scraping
             return self._scrape_personal_bests(tiref)
     
