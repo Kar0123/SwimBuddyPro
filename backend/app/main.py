@@ -49,10 +49,11 @@ app.add_middleware(
 )
 
 # Serve static files (frontend build)
-static_dir = Path(__file__).parent.parent.parent / "frontend" / "dist"
+static_dir = Path(__file__).parent.parent / "static"
 if static_dir.exists():
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
     app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
+    # Mount static files for other assets like favicon, etc.
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Include routers
 app.include_router(swimmers_router, prefix="/api/swimmers", tags=["swimmers"])
@@ -61,7 +62,7 @@ app.include_router(scraper_router, prefix="/api/scraper", tags=["scraper"])
 @app.get("/")
 async def root():
     """Serve the frontend application"""
-    static_dir = Path(__file__).parent.parent.parent / "frontend" / "dist"
+    static_dir = Path(__file__).parent.parent / "static"
     index_file = static_dir / "index.html"
     
     if index_file.exists():
@@ -73,6 +74,22 @@ async def root():
             "status": "running",
             "docs": "/docs"
         }
+
+# Catch-all route for SPA routing (must be last)
+@app.get("/{path:path}")
+async def catch_all(path: str):
+    """Serve the frontend application for all non-API routes"""
+    # Don't serve SPA for API routes
+    if path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+    
+    static_dir = Path(__file__).parent.parent / "static"
+    index_file = static_dir / "index.html"
+    
+    if index_file.exists():
+        return FileResponse(index_file)
+    else:
+        raise HTTPException(status_code=404, detail="Page not found")
 
 @app.get("/api/health")
 async def health_check():
