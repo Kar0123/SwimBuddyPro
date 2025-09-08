@@ -1,9 +1,12 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from contextlib import asynccontextmanager
 import logging
+import os
+from pathlib import Path
 
 from app.database.database import init_db
 from app.api.swimmers import router as swimmers_router
@@ -39,20 +42,17 @@ app = FastAPI(
 # CORS middleware for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:5173",  # Current Vite dev server port
-        "http://localhost:5186",  # Vite dev server port
-        "http://localhost:5187",  # Previous Vite dev server port
-        "http://127.0.0.1:5173",  # Alternative localhost
-        "http://127.0.0.1:5186",  # Alternative localhost
-        "http://127.0.0.1:5187",  # Alternative localhost
-        "*"  # Allow all origins for development
-    ],
+    allow_origins=["*"],  # Allow all origins for production deployment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static files (frontend build)
+static_dir = Path(__file__).parent.parent.parent / "frontend" / "dist"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
 
 # Include routers
 app.include_router(swimmers_router, prefix="/api/swimmers", tags=["swimmers"])
@@ -60,13 +60,19 @@ app.include_router(scraper_router, prefix="/api/scraper", tags=["scraper"])
 
 @app.get("/")
 async def root():
-    """Root endpoint with API information"""
-    return {
-        "message": "SwimBuddy Pro API",
-        "version": "1.0.0",
-        "status": "running",
-        "docs": "/docs"
-    }
+    """Serve the frontend application"""
+    static_dir = Path(__file__).parent.parent.parent / "frontend" / "dist"
+    index_file = static_dir / "index.html"
+    
+    if index_file.exists():
+        return FileResponse(index_file)
+    else:
+        return {
+            "message": "SwimBuddy Pro API",
+            "version": "1.0.0",
+            "status": "running",
+            "docs": "/docs"
+        }
 
 @app.get("/api/health")
 async def health_check():

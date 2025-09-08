@@ -13,14 +13,14 @@ export const CustomTitleBar = () => {
   const borderColor = useColorModeValue('gray.200', 'gray.700')
 
   const handleMinimize = () => {
-    if (window.electronAPI?.minimizeWindow) {
-      window.electronAPI.minimizeWindow()
+    if ((window as any).electronAPI?.minimizeWindow) {
+      (window as any).electronAPI.minimizeWindow()
     }
   }
 
   const handleClose = () => {
-    if (window.electronAPI?.closeWindow) {
-      window.electronAPI.closeWindow()
+    if ((window as any).electronAPI?.closeWindow) {
+      (window as any).electronAPI.closeWindow()
     }
   }
 
