@@ -759,8 +759,8 @@ export const RaceHistoryTable = ({ records, isLoading = false }: RaceHistoryTabl
 
         {currentRecords.length > 0 ? (
           <>
-            <TableContainer>
-              <Table variant="simple" size="sm">
+            <TableContainer overflowX="auto" maxW="100vw">
+              <Table variant="simple" size={{ base: "xs", md: "sm" }} fontSize={{ base: "xs", md: "sm" }}>
                 <Thead bg={headerBg}>
                   <Tr>
                     <Th 

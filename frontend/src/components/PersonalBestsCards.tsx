@@ -7,6 +7,7 @@ import {
   Text,
   VStack,
   HStack,
+  Stack,
   Badge,
   Button,
   Select,
@@ -365,7 +366,11 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
           )}
 
           {/* Filters */}
-          <HStack spacing={4} wrap="wrap">
+          <Stack 
+            direction={{ base: "column", md: "row" }}
+            spacing={{ base: 3, md: 4 }}
+            wrap="wrap"
+          >
             <InputGroup size="sm" maxW="250px">
               <InputLeftElement>
                 <SearchIcon color="turquoise.400" />
@@ -399,13 +404,13 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
               <option value="LC">Long Course</option>
               <option value="SC">Short Course</option>
             </Select>
-          </HStack>
+          </Stack>
         </VStack>
       </CardHeader>
 
       <CardBody>
         {filteredBests.length > 0 ? (
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={4}>
+          <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={{ base: 3, md: 4 }}>
             {filteredBests.map((pb, index) => (
               <Tooltip
                 key={`${pb.stroke}-${pb.distance}`}
@@ -431,7 +436,7 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                   borderRadius="xl"
                   overflow="hidden"
                   size="sm"
-                  height="180px"
+                  height={{ base: "160px", md: "180px" }}
                   position="relative"
                   _hover={{ 
                     transform: 'translateY(-2px)',
@@ -447,9 +452,9 @@ export const PersonalBestsCards = ({ tiref }: PersonalBestsCardsProps) => {
                     width="100%"
                   />
                   
-                  <CardBody p={4} display="flex" flexDirection="column" height="full">
+                  <CardBody p={{ base: 3, md: 4 }} display="flex" flexDirection="column" height="full">
                     {/* Header with stroke icon in colored box and pool type */}
-                    <HStack justify="space-between" align="start" mb={3}>
+                    <HStack justify="space-between" align="start" mb={{ base: 2, md: 3 }}>
                       <HStack spacing={2}>
                         <Box
                           bgGradient={`linear(135deg, ${pb.stroke_color}40, ${pb.stroke_color}20)`}

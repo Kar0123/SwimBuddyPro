@@ -8,7 +8,9 @@ import {
   Flex,
   Spacer,
   useToast,
-  HStack
+  HStack,
+  Spinner,
+  Progress
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { SwimmerInput } from './components/SwimmerInput'
@@ -173,30 +175,32 @@ function App() {
       <CustomTitleBar />
       
       {/* Main Content */}
-      <Container maxW={{ base: "container.sm", md: "container.md", lg: "container.xl" }} py={{ base: 4, md: 6 }} px={{ base: 4, md: 6 }}>
-        <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+      <Container maxW={{ base: "100%", sm: "container.sm", md: "container.md", lg: "container.xl" }} py={{ base: 2, md: 6 }} px={{ base: 2, md: 6 }}>
+        <VStack spacing={{ base: 4, md: 8 }} align="stretch">
           {/* Header */}
           <MotionBox
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Flex align="center" mb={6}>
-              <VStack align="start" spacing={2}>
+            <Flex align="center" mb={{ base: 4, md: 6 }} justify="center">
+              <VStack align={{ base: "center", md: "start" }} spacing={2}>
                 <Heading 
-                  size="2xl" 
+                  size={{ base: "xl", md: "2xl" }}
                   bgGradient="linear(to-r, turquoise.500, tropical.500)"
                   bgClip="text"
                   fontWeight="extrabold"
                   letterSpacing="-0.025em"
+                  textAlign={{ base: "center", md: "left" }}
                 >
                   🏊‍♀️ SwimBuddy Pro
                 </Heading>
                 <Text 
-                  fontSize="lg" 
+                  fontSize={{ base: "md", md: "lg" }}
                   color={useColorModeValue('seafoam.600', 'seafoam.300')}
                   fontWeight="medium"
                   letterSpacing="-0.01em"
+                  textAlign={{ base: "center", md: "left" }}
                 >
                   🌊 Dive Deep into Your Swimming Journey! 🌟
                 </Text>
@@ -258,13 +262,14 @@ function App() {
           >
             <Box
               textAlign="center"
-              py={16}
+              py={{ base: 8, md: 16 }}
+              px={{ base: 4, md: 0 }}
               color={useColorModeValue('gray.600', 'gray.400')}
             >
-              <Text fontSize="xl" mb={4}>
+              <Text fontSize={{ base: "lg", md: "xl" }} mb={4}>
                 Welcome to SwimBuddy Pro! 🏊‍♂️
               </Text>
-              <Text fontSize="md" maxW="md" mx="auto" lineHeight="tall">
+              <Text fontSize={{ base: "sm", md: "md" }} maxW={{ base: "sm", md: "md" }} mx="auto" lineHeight="tall">
                 Enter a swimmer's membership ID above to start analyzing their 
                 swimming performance with professional-grade insights and beautiful visualizations.
               </Text>
@@ -272,6 +277,40 @@ function App() {
           </PageTransition>
         </VStack>
       </Container>
+      
+      {/* Mobile-optimized Loading Overlay */}
+      {isLoading && (
+        <Box
+          position="fixed"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg="blackAlpha.600"
+          zIndex={9999}
+          display={{ base: "flex", md: "none" }}
+          alignItems="center"
+          justifyContent="center"
+          backdropFilter="blur(4px)"
+        >
+          <VStack spacing={4} bg="white" p={6} borderRadius="xl" shadow="2xl" mx={4} maxW="sm">
+            <Spinner size="xl" color="turquoise.500" thickness="4px" />
+            <Text fontSize="lg" fontWeight="600" textAlign="center">
+              🏊‍♀️ Fetching Swimmer Data
+            </Text>
+            <Text fontSize="sm" color="gray.600" textAlign="center">
+              This may take 10-30 seconds for complete results. We're gathering all the swimming data!
+            </Text>
+            <Progress 
+              size="sm" 
+              isIndeterminate 
+              colorScheme="turquoise" 
+              w="100%" 
+              borderRadius="full"
+            />
+          </VStack>
+        </Box>
+      )}
     </Box>
   )
 }
