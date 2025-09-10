@@ -20,6 +20,7 @@ import { CustomTitleBar } from './components/CustomTitleBar'
 import type { SwimmerData } from './services/api'
 import { apiService } from './services/api'
 import { PageTransition } from './components/animations/PageTransitions'
+import { InstallPWAButton, PWAStatus } from './components/InstallPWA'
 
 const MotionBox = motion(Box)
 
@@ -174,9 +175,15 @@ function App() {
       {/* Custom Title Bar for Electron */}
       <CustomTitleBar />
       
+      {/* PWA Status Indicator */}
+      <PWAStatus />
+      
       {/* Main Content */}
       <Container maxW={{ base: "100%", sm: "container.sm", md: "container.md", lg: "container.xl" }} py={{ base: 2, md: 6 }} px={{ base: 2, md: 6 }}>
         <VStack spacing={{ base: 4, md: 8 }} align="stretch">
+          
+          {/* PWA Install Banner */}
+          <InstallPWAButton variant="banner" />
           {/* Header */}
           <MotionBox
             initial={{ opacity: 0, y: -20 }}
