@@ -130,9 +130,9 @@ Desktop App → Local Network → Cloud Deployment → Mobile Apps
 /* Custom Water-Themed Design Language */
 .performance-card {
   background: linear-gradient(135deg, 
-    rgba(56, 178, 172, 0.1) 0%,
-    rgba(129, 230, 217, 0.05) 50%,
-    rgba(167, 243, 208, 0.1) 100%);
+    rgba(175, 183, 228, 0.1) 0%,
+    rgba(200, 200, 212, 0.05) 50%,
+    rgba(167, 215, 243, 0.1) 100%);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(56, 178, 172, 0.2);
 }
