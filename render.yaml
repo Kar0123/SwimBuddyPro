@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: swimbuddy-pro-frontend
+    env: node
+    buildCommand: npm run build
+    startCommand: npx serve -s frontend/dist -l $PORT
+    envVars:
+      - key: NODE_ENV
+        value: production
