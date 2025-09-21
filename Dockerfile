@@ -1,4 +1,4 @@
-# Multi-stage build for SwimBuddy Pro
+# Multi-stage build for SwimBuddy Pro - Frontend Only
 FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/frontend
@@ -7,31 +7,23 @@ RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
-# Python backend stage
-FROM python:3.9-slim
+# Final stage - serve frontend with Express
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy and install Python dependencies
-COPY backend/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy backend source code
-COPY backend/ ./backend/
+# Copy package.json and install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
 
 # Copy built frontend from previous stage
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist/
 
-# Set working directory to backend
-WORKDIR /app/backend
+# Copy Express server
+COPY server.js ./
 
 # Expose port
-EXPOSE 8000
+EXPOSE 3000
 
-# Start the application using shell form to handle environment variables
-CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+# Start the Express server
+CMD ["node", "server.js"]
